@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elden Ring D&D Database</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'serif': ['Cinzel', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'er-gold': '#d4af37',
+                        'er-dark': '#1a1a1a',
+                        'er-panel': '#242424',
+                        'er-border': '#3d3d3d',
+                        'rarity-common': '#b0b0b0',
+                        'rarity-uncommon': '#7da36e',
+                        'rarity-rare': '#5b85aa',
+                        'rarity-very-rare': '#8a5a9e',
+                        'rarity-legendary': '#c49a3f',
+                        'magic-sorcery': '#5b85aa',
+                        'magic-incantation': '#c49a3f',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0f0f0f;
+            background-image: radial-gradient(circle at 50% 0%, #2a2a2a 0%, #0f0f0f 70%);
+            background-attachment: fixed;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4af37; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b5952f; 
+        }
+        .item-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+        }
+        .modal-enter {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .tab-active {
+            border-bottom: 2px solid #d4af37;
+            color: #d4af37;
+        }
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: #78716c;
+            opacity: 0.7;
+        }
+        .tab-inactive:hover {
+            color: #a8a29e;
+            opacity: 1;
+        }
+        .linkified-text {
+            color: #d4af37;
+            text-decoration: underline;
+            text-decoration-color: rgba(212, 175, 55, 0.5);
+            text-underline-offset: 4px;
+            transition: color 0.2s, text-decoration-color 0.2s;
+            cursor: pointer;
+        }
+        .linkified-text:hover {
+            color: #ffffff;
+            text-decoration-color: #ffffff;
+        }
+
+        /* --- NEW DICE ROLLER & UI FIXES --- */
+
+        /* Fix for giant SVG icons */
+        .roll-btn svg, .modal-content svg {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: text-bottom;
+            pointer-events: none;
+        }
+        
+        .roll-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1e1a13;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #d4af37;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .roll-btn:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #d4af37;
+        }
+
+        /* Character Stats Sidebar */
+        #stats-sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background-color: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid #3d3d3d;
+            padding: 24px;
+            z-index: 100;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+        }
+        #stats-sidebar.open {
+            right: 0;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #d6d3d1;
+        }
+        .stat-row input {
+            width: 70px;
+            background: #242424;
+            color: #fff;
+            border: 1px solid #3d3d3d;
+            border-radius: 4px;
+            text-align: center;
+            padding: 4px;
+        }
+
+        /* Dice Log Minimization */
+        #dice-log {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background-color: rgba(36, 36, 36, 0.95);
+            backdrop-filter: blur(5px);
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            transition: max-height 0.3s ease;
+            max-height: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+        #dice-log.minimized {
+            max-height: 44px;
+            overflow: hidden;
+        }
+        #dice-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 15px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #3d3d3d;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            color: #d4af37;
+            user-select: none;
+        }
+        #dice-log-content {
+            overflow-y: auto;
+            padding: 15px;
+            flex-grow: 1;
+            max-height: 356px;
+        }
+        .log-entry {
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #3d3d3d;
+            padding-bottom: 8px;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+    </style>
+</head>
+
+<body class="text-stone-300 font-sans min-h-screen pb-12">
+
+    <!-- Header & Navigation -->
+    <header class="py-3 px-6 border-b border-er-border bg-er-dark/95 backdrop-blur-md sticky top-0 z-20 shadow-lg flex flex-col gap-3">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Branding -->
+            <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
+                <h1 class="text-lg md:text-xl text-er-gold font-serif font-bold tracking-wide">Elden Ring D&D</h1>
+                <span class="hidden sm:inline-block text-stone-500 text-xs uppercase tracking-widest border-l border-stone-700 pl-3">Database</span>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-4 font-serif text-sm tracking-widest uppercase">
+                <button id="tabWeapons" class="pb-1 transition-colors tab-active">Armory</button>
+                <button id="tabAshes" class="pb-1 transition-colors tab-inactive">Ashes of War</button>
+                <button id="tabSpells" class="pb-1 transition-colors tab-inactive">Grimoire</button>
+                <button id="tabWondrous" class="pb-1 transition-colors tab-inactive">Talisman and Consumables</button>
+                <button id="tabBooks" class="pb-1 transition-colors tab-inactive">Cookbooks and Spellbooks</button>
+            </div>
+            
+            <!-- Search, Sort & Stats Toggle -->
+            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto items-center">
+                <div class="w-full sm:w-64 relative">
+                    <input type="text" id="searchInput" placeholder="Search Archives..." class="w-full bg-er-panel border border-er-border rounded py-1.5 pl-3 pr-8 text-xs text-stone-200 focus:outline-none focus:border-er-gold focus:ring-1 focus:ring-er-gold transition-colors">
+                    <svg class="w-4 h-4 absolute right-2.5 top-1.5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                
+                <div class="w-full sm:w-auto flex items-center gap-2">
+                    <label for="sortSelect" class="text-stone-400 font-serif text-xs whitespace-nowrap">Sort By:</label>
+                    <select id="sortSelect" class="w-full bg-er-panel border border-er-border rounded py-1.5 px-2 text-xs text-stone-200 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                        <option value="alpha_asc">Alphabetical (A-Z)</option>
+                        <option value="alpha_desc">Alphabetical (Z-A)</option>
+                        <option value="rarity_desc" id="sortRarityDesc">Rarity (High to Low)</option>
+                        <option value="rarity_asc" id="sortRarityAsc">Rarity (Low to High)</option>
+                        <option value="type_asc" id="sortTypeAsc">Category (A-Z)</option>
+                        <option value="affinity_asc" id="sortAffinityAsc">Affinity (A-Z)</option>
+                        <option value="cost_desc" id="sortCostDesc" class="hidden">Cost (High to Low)</option>
+                        <option value="cost_asc" id="sortCostAsc" class="hidden">Cost (Low to High)</option>
+                        <option value="compat_asc" id="sortCompatAsc" class="hidden">Compatibility (A-Z)</option>
+                        <option value="compat_desc" id="sortCompatDesc" class="hidden">Compatibility (Z-A)</option>
+                        <option value="level_asc" id="sortLevelAsc" class="hidden">Spell Level (Low to High)</option>
+                        <option value="level_desc" id="sortLevelDesc" class="hidden">Spell Level (High to Low)</option>
+                    </select>
+                </div>
+
+                <button id="toggleStatsBtn" class="ml-2 bg-er-panel border border-er-gold text-er-gold px-3 py-1.5 rounded text-xs font-serif font-bold tracking-wider hover:bg-er-gold hover:text-er-dark transition-colors whitespace-nowrap">
+                    CHARACTER STATS
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-er-border/50">
+            <span class="text-stone-500 font-serif text-xs uppercase tracking-widest mr-2">Filter:</span>
+            
+            <select id="filterLetter" class="bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any Letter</option>
+            </select>
+
+            <select id="filterType" class="bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any Category / Compatibility</option>
+            </select>
+
+            <select id="filterRarityUnique" class="bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any Rarity / Uniqueness</option>
+            </select>
+
+            <select id="filterAffinity" class="bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any Affinity</option>
+                <option value="strength">Strength</option>
+                <option value="dexterity">Dexterity</option>
+                <option value="constitution">Constitution</option>
+                <option value="intelligence">Intelligence</option>
+                <option value="wisdom">Wisdom</option>
+                <option value="charisma">Charisma</option>
+                <option value="none">None</option>
+                <option value="special">Special</option>
+            </select>
+
+            <select id="filterSchool" class="hidden bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any School of Magic</option>
+            </select>
+
+            <select id="filterLevel" class="hidden bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any Spell Level</option>
+            </select>
+
+            <select id="filterCraftable" class="hidden bg-er-panel border border-er-border rounded py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <option value="all">Any Craftability</option>
+                <option value="true">Craftable Only</option>
+                <option value="false">Uncraftable Only</option>
+            </select>
+            
+            <button id="resetFilters" class="ml-auto text-xs text-stone-400 hover:text-er-gold transition-colors underline decoration-stone-600 hover:decoration-er-gold underline-offset-2">Reset All</button>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-6 mt-6">
+        <div id="itemCount" class="text-stone-400 text-xs font-serif tracking-widest uppercase mb-4"></div>
+        <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards injected via JavaScript -->
+        </div>
+        
+        <div id="noResults" class="hidden text-center py-20">
+            <h2 class="text-2xl font-serif text-stone-500">No entries found in the archives.</h2>
+        </div>
+    </main>
+
+    <!-- Character Stats Sidebar -->
+    <div id="stats-sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-serif font-bold text-er-gold tracking-widest">Attributes</h2>
+            <button id="closeStatsBtn" class="text-stone-400 hover:text-white p-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Character Level</label>
+                <input type="number" id="char-level" value="1" min="1" max="20">
+            </div>
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Strength</label>
+                <input type="number" id="stat-str" value="10" min="1" max="30">
+            </div>
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Dexterity</label>
+                <input type="number" id="stat-dex" value="10" min="1" max="30">
+            </div>
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Constitution</label>
+                <input type="number" id="stat-con" value="10" min="1" max="30">
+            </div>
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Intelligence</label>
+                <input type="number" id="stat-int" value="10" min="1" max="30">
+            </div>
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Wisdom</label>
+                <input type="number" id="stat-wis" value="10" min="1" max="30">
+            </div>
+            <div class="stat-row">
+                <label class="font-semibold uppercase tracking-wider text-sm">Charisma</label>
+                <input type="number" id="stat-cha" value="10" min="1" max="30">
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-er-border">
+                <label class="block text-er-gold font-serif font-bold uppercase tracking-widest mb-3">Spellcasting Modifier</label>
+                <select id="spellcasting-stat" class="w-full bg-er-panel border border-er-border rounded py-2 px-3 text-stone-200 focus:outline-none focus:border-er-gold cursor-pointer transition-colors">
+                    <option value="int">Intelligence</option>
+                    <option value="wis">Wisdom</option>
+                    <option value="cha">Charisma</option>
+                </select>
+                <p class="text-xs text-stone-500 mt-3 italic">This determines the saving throw DC and attack modifier generated on Grimoire cards.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unified Item Modal -->
+    <div id="itemModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6">
+        <div id="modalBackdrop" class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"></div>
+        <div class="relative bg-er-dark border border-er-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-enter">
+            
+            <!-- Close Button -->
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-stone-400 hover:text-white bg-er-panel rounded-full p-2 transition-colors z-10">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="p-6 sm:p-8">
+                
+                <!-- Modal Header -->
+                <div class="mb-6 border-b border-er-border pb-4">
+                    <h2 id="modalTitle" class="text-3xl font-serif font-bold text-er-gold mb-2">Item Name</h2>
+                    
+                    <!-- DYNAMIC SPELL COMBAT STATS WILL BE INJECTED HERE BY APP.JS -->
+                    <div id="modalDynamicStats" class="mb-3"></div>
+
+                    <div id="modalTags" class="flex flex-wrap gap-2 text-sm font-semibold tracking-wide uppercase">
+                        <span id="modalLevel" class="bg-er-panel px-3 py-1 rounded text-stone-300 border border-stone-700 hidden">Level</span>
+                        <span id="modalType" class="bg-er-panel px-3 py-1 rounded text-stone-300 border border-stone-700">Type</span>
+                        <span id="modalRarity" class="bg-er-panel px-3 py-1 rounded border border-stone-700">Rarity</span>
+                        <span id="modalAffinity" class="bg-er-panel px-3 py-1 rounded text-stone-300 border border-stone-700">Affinity</span>
+                        <span id="modalSchool" class="bg-er-panel px-3 py-1 rounded text-stone-300 border border-stone-700 hidden">School</span>
+                    </div>
+                </div>
+
+                <!-- Spell Specific Attributes Grid -->
+                <div id="modalSpellStats" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-er-panel p-4 rounded-lg border border-er-border text-sm hidden">
+                    <div><span class="text-stone-500 font-bold">Casting Time:</span> <span id="modalTime" class="text-stone-300"></span></div>
+                    <div><span class="text-stone-500 font-bold">Range:</span> <span id="modalRange" class="text-stone-300"></span></div>
+                    <div><span class="text-stone-500 font-bold">Components:</span> <span id="modalComponents" class="text-stone-300"></span></div>
+                    <div><span class="text-stone-500 font-bold">Duration:</span> <span id="modalDuration" class="text-stone-300"></span></div>
+                </div>
+
+                <!-- Main Descriptions -->
+                <div class="mb-6">
+                    <p id="modalDescription" class="text-stone-300 italic leading-relaxed mb-4 hidden"></p>
+                    <div id="modalSpellDescription" class="text-stone-300 text-sm leading-relaxed space-y-4 whitespace-pre-wrap hidden"></div>
+                    
+                    <div id="modalPassiveContainer" class="hidden bg-er-panel border-l-4 border-er-gold p-4 rounded-r mt-4">
+                        <h4 class="text-er-gold font-serif font-semibold mb-1" id="modalPassiveTitle">Passive Effect</h4>
+                        <p id="modalPassive" class="text-stone-300 text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Weapon Skill Block -->
+                <div id="modalSkillContainer" class="bg-[#1e1a13] border border-[#d4af37]/30 rounded-lg p-5 hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xl font-serif text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-er-gold" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path></svg>
+                            <span id="modalSkillName">Skill Name</span>
+                        </h3>
+                        <span id="modalSkillSp" class="bg-blue-900/50 text-blue-200 border border-blue-500/50 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">0 SP</span>
+                    </div>
+                    <p id="modalSkillDesc" class="text-stone-300 text-sm leading-relaxed"></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Dice Log -->
+    <div id="dice-log">
+        <div id="dice-log-header">
+            <span class="tracking-widest uppercase text-sm">Action Log</span>
+            <span id="toggle-log-icon" class="text-stone-400 hover:text-white transition-colors">[-]</span>
+        </div>
+        <div id="dice-log-content">
+            <div class="text-stone-500 text-xs italic text-center mt-2">Awaiting your command...</div>
+        </div>
+    </div>
+
+    <!-- Data Files -->
+    <script src="data_weapons.js"></script>
+    <script src="data_ashes.js"></script>
+    <script src="data_spells.js"></script>
+    <script src="data_wondrous.js"></script>
+    <script src="data_books.js"></script>
+    
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+
+</body>
+</html>
