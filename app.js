@@ -135,11 +135,7 @@ function parseDiceNotation(text) {
 
         const cleanBonus = bonus ? bonus : '';
         const safeLabel = `${type} damage`.replace(/'/g, "\\'");
-        const btnHtml = `<button class="roll-btn" onclick="executeRoll('${dice}', '${cleanBonus}', '${safeLabel}')" title="Roll ${dice}${cleanBonus}">${svgIcon} ${match}</button>`;
-        
-        const tokenId = `__DICE_TOKEN_${tokens.length}__`;
-        tokens.push(btnHtml);
-        return tokenId;
+        return `@@AVG|${dice}|${cleanBonus}|${safeLabel}|${match}@@`;
     });
 
     const simpleDiceRegex = /(?<!\()\b(\d+d\d+)([\+\-]\d+)?\b(?!\))/gi;
@@ -148,15 +144,15 @@ function parseDiceNotation(text) {
         if (before.lastIndexOf('<') > before.lastIndexOf('>')) return match; 
         
         const cleanBonus = bonus ? bonus : '';
-        const btnHtml = `<button class="roll-btn" onclick="executeRoll('${dice}', '${cleanBonus}', 'Roll')" title="Roll ${match}">${svgIcon} ${match}</button>`;
-        
-        const tokenId = `__DICE_TOKEN_${tokens.length}__`;
-        tokens.push(btnHtml);
-        return tokenId;
+        return `@@SMP|${dice}|${cleanBonus}|Roll|${match}@@`;
     });
 
-    tokens.forEach((html, index) => {
-        parsedText = parsedText.replace(`__DICE_TOKEN_${index}__`, html);
+    parsedText = parsedText.replace(/@@AVG\|([^|]+)\|([^|]*)\|([^|]+)\|([^@]+)@@/g, (match, dice, bonus, label, original) => {
+        return `<button class="roll-btn" onclick="executeRoll('${dice}', '${bonus}', '${label}')" title="Roll ${dice}${bonus}">${svgIcon} ${original}</button>`;
+    });
+
+    parsedText = parsedText.replace(/@@SMP\|([^|]+)\|([^|]*)\|([^|]+)\|([^@]+)@@/g, (match, dice, bonus, label, original) => {
+        return `<button class="roll-btn" onclick="executeRoll('${dice}', '${bonus}', '${label}')" title="Roll ${dice}${bonus}">${svgIcon} ${original}</button>`;
     });
 
     return parsedText;
@@ -194,10 +190,9 @@ function linkifyText(text) {
     const safeSpells = typeof spells !== 'undefined' ? spells : [];
     const safeWondrous = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
     const safeBooks = typeof books !== 'undefined' ? books : [];
+    const safeMaterials = typeof materials !== 'undefined' ? materials : [];
     
     const linkItems = [];
-    
-    // Helper function to safely escape regex special characters (like ! or [ ])
     const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     
     safeSpells.forEach(spell => {
@@ -244,6 +239,15 @@ function linkifyText(text) {
             linkItems.push({ name: book.name, replacement: `<span onclick="jumpToBook('${safeName}')" class="linkified-text" title="View Book Details">$&</span>`});
         }
     });
+    
+    safeMaterials.forEach(mat => {
+        const escapedName = escapeRegExp(mat.name);
+        const regex = new RegExp(`(?<=\\W|^)${escapedName}(?=\\W|$)`, "gi");
+        if (regex.test(linkedText)) {
+            const safeName = mat.name.replace(/'/g, "\\'");
+            linkItems.push({ name: mat.name, replacement: `<span onclick="jumpToMaterial('${safeName}')" class="linkified-text" title="View Material Details">$&</span>`});
+        }
+    });
 
     linkItems.sort((a, b) => b.name.length - a.name.length);
     linkItems.forEach(item => {
@@ -279,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabSpellsBtn = document.getElementById('tabSpells');
     const tabWondrousBtn = document.getElementById('tabWondrous');
     const tabBooksBtn = document.getElementById('tabBooks');
+    const tabMaterialsBtn = document.getElementById('tabMaterials');
 
     const statsSidebar = document.getElementById('stats-sidebar');
     const toggleStatsBtn = document.getElementById('toggleStatsBtn');
@@ -295,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('change', (e) => {
                 charStats[stat] = parseInt(e.target.value) || 10;
                 saveStats();
-                if (currentOpenItem) openModal(currentOpenItem);
+                if (currentOpenItem) openModal(currentOpenItem); 
             });
         }
     });
@@ -340,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabSpellsBtn) tabSpellsBtn.addEventListener('click', () => switchTab('spells'));
     if (tabWondrousBtn) tabWondrousBtn.addEventListener('click', () => switchTab('wondrous'));
     if (tabBooksBtn) tabBooksBtn.addEventListener('click', () => switchTab('books'));
+    if (tabMaterialsBtn) tabMaterialsBtn.addEventListener('click', () => switchTab('materials'));
 
     [searchInput, sortSelect, filterLetter, filterType, filterRarityUnique, filterAffinity, filterSchool, filterLevel]
         .forEach(el => {
@@ -354,11 +360,11 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.value = '';
             sortSelect.value = 'alpha_asc';
             filterLetter.value = 'all';
-            filterType.value = 'all';
-            filterRarityUnique.value = 'all';
-            filterAffinity.value = 'all';
-            if (filterSchool) filterSchool.value = 'all';
-            if (filterLevel) filterLevel.value = 'all';
+            if (filterType && !filterType.classList.contains('hidden')) filterType.value = 'all';
+            if (filterRarityUnique && !filterRarityUnique.classList.contains('hidden')) filterRarityUnique.value = 'all';
+            if (filterAffinity && !filterAffinity.classList.contains('hidden')) filterAffinity.value = 'all';
+            if (filterSchool && !filterSchool.classList.contains('hidden')) filterSchool.value = 'all';
+            if (filterLevel && !filterLevel.classList.contains('hidden')) filterLevel.value = 'all';
             filterAndSort();
         });
     }
@@ -413,6 +419,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const book = typeof books !== 'undefined' ? books.find(b => b.name === bookName) : null;
         if (book) setTimeout(() => openModal(book), 150);
     };
+    
+    window.jumpToMaterial = function(matName) {
+        closeModal();
+        switchTab('materials');
+        searchInput.value = matName;
+        filterAndSort();
+        const mat = typeof materials !== 'undefined' ? materials.find(m => m.name === matName) : null;
+        if (mat) setTimeout(() => openModal(mat), 150);
+    };
 
     function switchTab(tab) {
         currentTab = tab;
@@ -422,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tabSpellsBtn) tabSpellsBtn.className = tab === 'spells' ? 'pb-1 transition-colors tab-active' : 'pb-1 transition-colors tab-inactive';
         if (tabWondrousBtn) tabWondrousBtn.className = tab === 'wondrous' ? 'pb-1 transition-colors tab-active' : 'pb-1 transition-colors tab-inactive';
         if (tabBooksBtn) tabBooksBtn.className = tab === 'books' ? 'pb-1 transition-colors tab-active' : 'pb-1 transition-colors tab-inactive';
+        if (tabMaterialsBtn) tabMaterialsBtn.className = tab === 'materials' ? 'pb-1 transition-colors tab-active' : 'pb-1 transition-colors tab-inactive';
         
         buildControls();
         filterAndSort();
@@ -596,6 +612,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 <option value="cookbook">Cookbooks</option>
                 <option value="spellbook">Spellbooks</option>
             `;
+        } else if (currentTab === 'materials') {
+            sortSelect.innerHTML += `
+                <option value="rarity_desc">Rarity (High to Low)</option>
+                <option value="rarity_asc">Rarity (Low to High)</option>
+            `;
+            
+            filterType.classList.add('hidden');
+            filterRarityUnique.classList.remove('hidden');
+            filterAffinity.classList.add('hidden');
+            if (filterSchool) filterSchool.classList.add('hidden');
+            if (filterLevel) filterLevel.classList.add('hidden');
+            
+            filterRarityUnique.innerHTML = `
+                <option value="all">Any Rarity</option>
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very rare">Very Rare</option>
+            `;
         }
     }
 
@@ -738,10 +773,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (sortVal === 'type_desc') return b.type.localeCompare(a.type) || a.name.localeCompare(b.name);
                 return 0;
             });
+            
+        } else if (currentTab === 'materials' && typeof materials !== 'undefined') {
+            const rarityVal = filterRarityUnique.value;
+
+            filtered = materials.filter(m => {
+                let match = m.name.toLowerCase().includes(query) || m.description.toLowerCase().includes(query);
+                if (!match) return false;
+                if (letterVal !== 'all' && !m.name.toLowerCase().startsWith(letterVal)) return false;
+                if (rarityVal !== 'all' && m.rarity.toLowerCase() !== rarityVal) return false;
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
+                if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
+                if (sortVal === 'rarity_desc') return (rarityWeights[b.rarity.toLowerCase()] || 0) - (rarityWeights[a.rarity.toLowerCase()] || 0);
+                if (sortVal === 'rarity_asc') return (rarityWeights[a.rarity.toLowerCase()] || 0) - (rarityWeights[b.rarity.toLowerCase()] || 0);
+                return 0;
+            });
         }
 
         if (itemCount) {
-            const typeName = currentTab === 'weapons' ? 'Armaments' : currentTab === 'ashes' ? 'Ashes of War' : currentTab === 'wondrous' ? 'Relics & Items' : currentTab === 'books' ? 'Tomes & Recipes' : 'Spells';
+            const typeName = currentTab === 'weapons' ? 'Armaments' : currentTab === 'ashes' ? 'Ashes of War' : currentTab === 'wondrous' ? 'Relics & Items' : currentTab === 'books' ? 'Tomes & Recipes' : currentTab === 'materials' ? 'Materials' : 'Spells';
             itemCount.innerHTML = `Showing <span class="text-er-gold font-bold text-sm">${filtered.length}</span> ${typeName}`;
         }
 
@@ -844,6 +898,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 topTags = `
                     <span class="text-xs font-semibold uppercase tracking-wider ${titleColor}">${item.type}</span>
                     <span class="text-xs font-semibold uppercase tracking-wider ${rarityColors[item.rarity]}">${item.rarity}</span>
+                `;
+            } else if (currentTab === 'materials') {
+                titleColor = 'text-green-400';
+                topTags = `
+                    <span class="text-xs font-semibold uppercase tracking-wider ${rarityColors[item.rarity]}">${item.rarity}</span>
+                    <span class="text-xs text-stone-500 font-semibold uppercase tracking-wider">${item.type}</span>
+                `;
+                bottomInfo = `
+                    <div class="mt-auto pt-4 border-t border-stone-800 text-xs text-stone-400 italic line-clamp-2">
+                        ${item.description}
+                    </div>
                 `;
             }
 
@@ -1023,8 +1088,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('modalSpellDescription').innerHTML = parseDiceNotation(linkifyText(item.description));
             document.getElementById('modalSpellDescription').classList.remove('hidden');
             
-        } else if (currentTab === 'wondrous' || currentTab === 'books') {
-            titleEl.classList.add(currentTab === 'wondrous' ? 'text-er-gold' : item.type === 'Cookbook' ? 'text-orange-400' : 'text-purple-400');
+        } else if (currentTab === 'wondrous' || currentTab === 'books' || currentTab === 'materials') {
+            titleEl.classList.add(currentTab === 'wondrous' ? 'text-er-gold' : item.type === 'Cookbook' ? 'text-orange-400' : currentTab === 'materials' ? 'text-green-400' : 'text-purple-400');
             
             const typeEl = document.getElementById('modalType');
             typeEl.textContent = item.type;
@@ -1042,9 +1107,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (item.recipe) {
                 descHtml += `
-                    <div class="mt-4 pt-4 border-t border-stone-800">
-                        <h4 class="text-er-gold font-serif font-semibold mb-2 tracking-wide uppercase text-xs">Crafting Recipe</h4>
-                        <p class="text-stone-300 text-sm leading-relaxed whitespace-pre-wrap not-italic">${parseDiceNotation(linkifyText(item.recipe))}</p>
+                    <div class="mt-4 pt-4 border-t border-er-border">
+                        <h4 class="text-er-gold font-serif font-semibold mb-2">Crafting Recipe</h4>
+                        <p class="text-stone-300 text-sm leading-relaxed whitespace-pre-wrap">${parseDiceNotation(linkifyText(item.recipe))}</p>
                     </div>
                 `;
             }
