@@ -119,11 +119,11 @@
         }
     </style>
 </head>
-<body class="text-stone-300 font-sans min-h-screen flex flex-col">
+<body class="text-stone-300 font-sans h-screen flex flex-col overflow-hidden">
 
     <!-- Main Content Area -->
-    <div id="mainContent" class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto relative z-0 transition-all duration-300">
-        <header class="py-3 px-4 sm:px-6 border-b border-er-border bg-er-dark/95 backdrop-blur-md sticky top-0 z-20 shadow-lg flex flex-col gap-3">
+    <div id="mainContent" class="flex-1 flex flex-col min-w-0 h-full relative z-0 transition-all duration-300">
+        <header class="shrink-0 py-3 px-4 sm:px-6 border-b border-er-border bg-er-dark/95 backdrop-blur-md z-20 shadow-lg flex flex-col gap-3">
             
             <!-- Top Row: Title & Mobile Toggle -->
             <div class="flex items-center justify-between gap-3">
@@ -209,16 +209,18 @@
             <div id="itemCount" class="text-xs text-stone-500 text-center sm:text-left mt-1 sm:mt-0"></div>
         </header>
 
-        <main class="flex-1 p-4 sm:p-6 w-full max-w-7xl mx-auto">
-            <!-- Grid scales from 1 col (mobile) to 4 cols (desktop) -->
-            <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                <!-- Cards injected via JavaScript -->
-            </div>
-            
-            <div id="noResults" class="hidden text-center py-20">
-                <h2 class="text-xl sm:text-2xl font-serif text-stone-500">No entries found in the archives.</h2>
-            </div>
-        </main>
+        <div class="flex-1 overflow-y-auto w-full relative">
+            <main class="p-4 sm:p-6 w-full max-w-7xl mx-auto">
+                <!-- Grid scales from 1 col (mobile) to 4 cols (desktop) -->
+                <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    <!-- Cards injected via JavaScript -->
+                </div>
+                
+                <div id="noResults" class="hidden text-center py-20">
+                    <h2 class="text-xl sm:text-2xl font-serif text-stone-500">No entries found in the archives.</h2>
+                </div>
+            </main>
+        </div>
     </div>
 
     <!-- Responsive Stats Sidebar -->
@@ -453,6 +455,7 @@
             "sacred seal": ["catalyst"]
         };
 
+        // --- STREAMING_CHUNK:Configuring the dice engine... ---
         // --- DICE ENGINE ---
         function logDiceRoll(title, resultStr, total, isCrit = false) {
             const logContent = document.getElementById('dice-log-content');
@@ -544,6 +547,7 @@
             return parsedText;
         }
 
+        // --- STREAMING_CHUNK:Configuring the linkify engine... ---
         // --- LINKIFY ENGINE ---
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -700,6 +704,7 @@
             if (mat) setTimeout(() => openModal(mat), 150);
         };
 
+        // --- STREAMING_CHUNK:Attaching core event listeners... ---
         // --- MAIN APP INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             // Stats Inputs Sync
@@ -733,6 +738,7 @@
             const mobileOverlay = document.getElementById('mobile-overlay');
             const mainContent = document.getElementById('mainContent');
 
+            // Default State: Keep sidebar closed initially on all devices.
             function openSidebar() {
                 statsSidebar.classList.remove('translate-x-full');
                 if (window.innerWidth >= 1024) {
@@ -758,14 +764,15 @@
                 }
             }
 
-            if (toggleStatsBtn) toggleStatsBtn.addEventListener('click', openSidebar);
+            if (toggleStatsBtn) toggleStatsBtn.addEventListener('click', () => {
+                if (statsSidebar.classList.contains('translate-x-full')) {
+                    openSidebar();
+                } else {
+                    closeSidebar();
+                }
+            });
             if (closeStatsBtn) closeStatsBtn.addEventListener('click', closeSidebar);
             if (mobileOverlay) mobileOverlay.addEventListener('click', closeSidebar);
-
-            // Open sidebar by default on large screens
-            if (window.innerWidth >= 1024) {
-                openSidebar();
-            }
 
             // Handle resize to adjust layout dynamically
             window.addEventListener('resize', () => {
@@ -872,6 +879,7 @@
             switchTab('weapons');
         });
 
+        // --- STREAMING_CHUNK:Adding tab and sorting logic... ---
         // --- TAB & FILTER LOGIC ---
         function switchTab(tab) {
             currentTab = tab;
@@ -1247,6 +1255,7 @@
             renderItems(filtered);
         }
 
+        // --- STREAMING_CHUNK:Rendering the item cards and modal... ---
         // --- RENDER MODAL & GRID ---
         function renderItems(items) {
             const gridContainer = document.getElementById('gridContainer');
