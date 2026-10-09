@@ -1977,6 +1977,102 @@ const wondrousItems = [
         description: "<i>Craftable item prepared using a pot. Pack ingredients inside that produce unique effects when broken afterwards.</i>",
         recipe: "1 Cracked Pot, 2 Volcanic Stone\nFound in: Nomadic Warrior's Cookbook [20]",
         effect: "As an action, you can throw this pot up to 20 feet, shattering it on impact. Make a ranged attack against a creature or object, treating the throwing pot as a simple ranged weapon. The pot shatters after being thrown and the empty pot used reforms in the thrower's inventory at the end of their next long rest.\n\nOn a hit, the target takes 14 (4d6) fire damage and a cloud of superheated gas appears in a 5-foot radius sphere around the target until the end of your next turn. Each creature that moves into the area or ends their turn there takes 7 (2d6) fire damage."
+    },
+    {
+        name: "Padded Armor",
+        type: "Light Armor (Padded)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard light armor. Consists of quilted layers of cloth and batting.</i>",
+        effect: "Base Armor Class (AC): 11 + Dexterity modifier. Disadvantage on Stealth checks."
+    },
+    {
+        name: "Leather Armor",
+        type: "Light Armor (Leather)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard light armor. The breastplate and shoulder protectors of this armor are made of leather that has been stiffened by being boiled in oil.</i>",
+        effect: "Base Armor Class (AC): 11 + Dexterity modifier."
+    },
+    {
+        name: "Studded Leather Armor",
+        type: "Light Armor (Studded Leather)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard light armor. Made from tough but flexible leather, studded with metal rivets or spikes.</i>",
+        effect: "Base Armor Class (AC): 12 + Dexterity modifier."
+    },
+    {
+        name: "Hide Armor",
+        type: "Medium Armor (Hide)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard medium armor. A crude armor consisting of thick furs and pelts.</i>",
+        effect: "Base Armor Class (AC): 12 + Dexterity modifier (max 2)."
+    },
+    {
+        name: "Chain Shirt",
+        type: "Medium Armor (Chain Shirt)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard medium armor. Made of interlocking metal rings, worn between layers of clothing or leather.</i>",
+        effect: "Base Armor Class (AC): 13 + Dexterity modifier (max 2)."
+    },
+    {
+        name: "Scale Mail",
+        type: "Medium Armor (Scale Mail)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard medium armor. Consists of a leather coat and leggings covered with overlapping pieces of metal.</i>",
+        effect: "Base Armor Class (AC): 14 + Dexterity modifier (max 2). Disadvantage on Stealth checks."
+    },
+    {
+        name: "Breastplate",
+        type: "Medium Armor (Breastplate)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard medium armor. Consists of a fitted metal chest piece worn with supple leather.</i>",
+        effect: "Base Armor Class (AC): 14 + Dexterity modifier (max 2)."
+    },
+    {
+        name: "Half Plate",
+        type: "Medium Armor (Half Plate)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard medium armor. Consists of shaped metal plates that cover most of the wearer's body.</i>",
+        effect: "Base Armor Class (AC): 15 + Dexterity modifier (max 2). Disadvantage on Stealth checks."
+    },
+    {
+        name: "Ring Mail",
+        type: "Heavy Armor (Ring Mail)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard heavy armor. Leather armor with heavy rings sewn into it.</i>",
+        effect: "Base Armor Class (AC): 14. Disadvantage on Stealth checks."
+    },
+    {
+        name: "Chain Mail",
+        type: "Heavy Armor (Chain Mail)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard heavy armor. Made of interlocking metal rings.</i>",
+        effect: "Base Armor Class (AC): 16. Strength 13 required. Disadvantage on Stealth checks."
+    },
+    {
+        name: "Splint Armor",
+        type: "Heavy Armor (Splint)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard heavy armor. Made of narrow vertical strips of metal riveted to a backing of leather.</i>",
+        effect: "Base Armor Class (AC): 17. Strength 15 required. Disadvantage on Stealth checks."
+    },
+    {
+        name: "Plate Armor",
+        type: "Heavy Armor (Plate)",
+        rarity: "Common",
+        craftable: false,
+        description: "<i>Standard heavy armor. Consists of shaped, interlocking metal plates to cover the entire body.</i>",
+        effect: "Base Armor Class (AC): 18. Strength 15 required. Disadvantage on Stealth checks."
     }
         
 ];

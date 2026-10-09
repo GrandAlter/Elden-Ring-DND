@@ -1,5 +1,284 @@
 const weapons = [
     {
+        name: "Mace",
+        type: "Mace",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A simple melee weapon. Deals 1d8 bludgeoning damage. Weight: 7 lb.",
+        passive: null,
+        skill: { name: "Kick" }
+    },
+    {
+        name: "Dagger",
+        type: "Dagger",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A simple melee weapon. Deals 1d4 piercing damage. Weight: 1 lb. Properties: Finesse, light, thrown (range 20/60).",
+        passive: null,
+        skill: { name: "Quickstep" }
+    },
+    {
+        name: "Handaxe",
+        type: "Handaxe",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A simple melee weapon. Deals 1d6 slashing damage. Weight: 3 lb. Properties: Light, thrown (range 20/60).",
+        passive: null,
+        skill: { name: "Quickstep" }
+    },
+    {
+        name: "Spear",
+        type: "Spear",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A simple melee weapon. Deals 1d6 piercing damage. Weight: 3 lb. Properties: Thrown (range 20/60), versatile (1d8).",
+        passive: null,
+        skill: { name: "Impaling Thrust" }
+    },
+    {
+        name: "Caestus",
+        type: "Caestus",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A simple melee weapon. Deals 1d4 bludgeoning damage. Weight: 1 lb. Properties: Light, Special.",
+        passive: null,
+        skill: { name: "Endure" }
+    },
+    {
+        name: "Claws",
+        type: "Claws",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A simple melee weapon. Deals 1d4 slashing damage. Weight: 4 lb. Properties: Light, Versatile (1d8).",
+        passive: null,
+        skill: { name: "Quickstep" }
+    },
+    {
+        name: "Torch",
+        type: "Torch",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A simple melee weapon. Deals 1d4 fire damage. Weight: 1 lb. Properties: Light.",
+        passive: null,
+        skill: { name: "No Skill" }
+    },
+    {
+        name: "Shortbow",
+        type: "Shortbow",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A simple ranged weapon. Deals 1d6 piercing damage. Weight: 2 lb. Properties: Ammunition (range 80/320), two-handed.",
+        passive: null,
+        skill: { name: "Barrage" }
+    },
+    {
+        name: "Light Crossbow",
+        type: "Light Crossbow",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A simple ranged weapon. Deals 1d8 piercing damage. Weight: 5 lb. Properties: Ammunition (range 80/320), loading, two-handed.",
+        passive: null,
+        skill: { name: "Kick" }
+    },
+    {
+        name: "Longbow",
+        type: "Longbow",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial ranged weapon. Deals 1d8 piercing damage. Weight: 2 lb. Properties: Ammunition (range 150/600), heavy, two-handed.",
+        passive: null,
+        skill: { name: "Mighty Shot" }
+    },
+    {
+        name: "Greatbow",
+        type: "Greatbow",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial ranged weapon. Deals 1d10 piercing damage. Weight: 15 lb. Properties: Ammunition (range 200/800), heavy, two-handed, special.",
+        passive: null,
+        skill: { name: "Through and Through" }
+    },
+    {
+        name: "Heavy Crossbow",
+        type: "Heavy Crossbow",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial ranged weapon. Deals 1d10 piercing damage. Weight: 18 lb. Properties: Ammunition (range 100/400), heavy, loading, two-handed.",
+        passive: null,
+        skill: { name: "Kick" }
+    },
+    {
+        name: "Longsword",
+        type: "Longsword",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d8 slashing damage. Weight: 3 lb. Properties: Versatile (1d10).",
+        passive: null,
+        skill: { name: "Square Off" }
+    },
+    {
+        name: "Shortsword",
+        type: "Shortsword",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d6 piercing damage. Weight: 3 lb. Properties: Light, Finesse.",
+        passive: null,
+        skill: { name: "Kick" }
+    },
+    {
+        name: "Scimitar",
+        type: "Scimitar",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d6 slashing damage. Weight: 3 lb. Properties: Light, Finesse.",
+        passive: null,
+        skill: { name: "Spinning Slash" }
+    },
+    {
+        name: "Katana",
+        type: "Katana",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d8 slashing damage. Weight: 2 lb. Properties: Finesse.",
+        passive: null,
+        skill: { name: "Unsheathe" }
+    },
+    {
+        name: "Cleaver",
+        type: "Cleaver",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d10 piercing damage. Weight: 3 lb. Properties: Finesse, Two-Handed, Heavy.",
+        passive: null,
+        skill: { name: "Spinning Slash" }
+    },
+    {
+        name: "Greatsword",
+        type: "Greatsword",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 2d6 slashing damage. Weight: 6 lb. Properties: Heavy, two-handed.",
+        passive: null,
+        skill: { name: "Stamp (Upward Cut)" }
+    },
+    {
+        name: "Ultra Greatsword",
+        type: "Ultra Greatsword",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 3d6 slashing damage. Weight: 6 lb. Properties: Heavy, two-handed, colossal.",
+        passive: null,
+        skill: { name: "Stamp (Upward Cut)" }
+    },
+    {
+        name: "Rapier",
+        type: "Rapier",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d8 piercing damage. Weight: 2 lb. Properties: Finesse.",
+        passive: null,
+        skill: { name: "Spinning Slash" }
+    },
+    {
+        name: "Twinblade",
+        type: "Twinblade",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d8 slashing damage. Weight: 6 lb. Properties: Two-handed, Special.",
+        passive: null,
+        skill: { name: "Spinning Slash" }
+    },
+    {
+        name: "Battleaxe",
+        type: "Battleaxe",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d8 slashing damage. Weight: 4 lb. Properties: Versatile (1d10).",
+        passive: null,
+        skill: { name: "Wild Strikes" }
+    },
+    {
+        name: "Greataxe",
+        type: "Greataxe",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d12 slashing damage. Weight: 7 lb. Properties: Heavy, two-handed.",
+        passive: null,
+        skill: { name: "Barbaric Roar" }
+    },
+    {
+        name: "Flail",
+        type: "Flail",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d8 slashing damage. Weight: 2 lb.",
+        passive: null,
+        skill: { name: "Spinning Chain" }
+    },
+    {
+        name: "Maul",
+        type: "Maul",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 2d6 bludgeoning damage. Weight: 10 lb. Properties: Heavy, two-handed.",
+        passive: null,
+        skill: { name: "Endure" }
+    },
+    {
+        name: "Colossal Weapon",
+        type: "Colossal Weapon",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 3d6 bludgeoning damage. Weight: 6 lb. Properties: Heavy, two-handed, colossal.",
+        passive: null,
+        skill: { name: "Endure" }
+    },
+    {
+        name: "Lance",
+        type: "Lance",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d12 piercing damage. Weight: 6 lb. Properties: Reach, special.",
+        passive: null,
+        skill: { name: "Charge Forth" }
+    },
+    {
+        name: "Halberd",
+        type: "Halberd",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d10 slashing damage. Weight: 6 lb. Properties: Heavy, reach, two-handed.",
+        passive: null,
+        skill: { name: "Charge Forth" }
+    },
+    {
+        name: "Pike",
+        type: "Pike",
+        rarity: "Common",
+        affinity: "Strength",
+        description: "A martial melee weapon. Deals 1d10 piercing damage. Weight: 18 lb. Properties: Heavy, two-handed, Reach.",
+        passive: null,
+        skill: { name: "Charge Forth" }
+    },
+    {
+        name: "Reaper",
+        type: "Reaper",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d8 piercing damage. Weight: 3 lb. Properties: Finesse, two-handed, reach.",
+        passive: null,
+        skill: { name: "Spinning Slash" }
+    },
+    {
+        name: "Whip",
+        type: "Whip",
+        rarity: "Common",
+        affinity: "Dexterity",
+        description: "A martial melee weapon. Deals 1d4 slashing damage. Weight: 3 lb. Properties: Finesse, reach.",
+        passive: null,
+        skill: { name: "Kick" }
+    },
+    {
         name: "Alabaster Lord's Sword",
         type: "Greatsword",
         rarity: "Uncommon",
