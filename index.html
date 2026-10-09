@@ -119,10 +119,10 @@
         }
     </style>
 </head>
-<body class="text-stone-300 font-sans min-h-screen flex flex-col lg:flex-row">
+<body class="text-stone-300 font-sans min-h-screen flex flex-col">
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto relative z-0">
+    <div id="mainContent" class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto relative z-0 transition-all duration-300">
         <header class="py-3 px-4 sm:px-6 border-b border-er-border bg-er-dark/95 backdrop-blur-md sticky top-0 z-20 shadow-lg flex flex-col gap-3">
             
             <!-- Top Row: Title & Mobile Toggle -->
@@ -131,8 +131,8 @@
                     <h1 class="text-lg sm:text-xl text-er-gold font-serif font-bold tracking-wide truncate">Elden Ring D&D</h1>
                     <span class="hidden sm:inline-block text-stone-500 text-xs uppercase tracking-widest border-l border-stone-700 pl-3">Database</span>
                 </div>
-                <!-- Mobile Stats Toggle Button -->
-                <button id="toggleStatsBtn" class="lg:hidden flex items-center gap-2 bg-er-panel border border-er-border px-3 py-1.5 rounded text-xs text-er-gold hover:text-white hover:border-er-gold transition-colors shadow-sm focus:outline-none">
+                <!-- Stats Toggle Button -->
+                <button id="toggleStatsBtn" class="flex items-center gap-2 bg-er-panel border border-er-border px-3 py-1.5 rounded text-xs text-er-gold hover:text-white hover:border-er-gold transition-colors shadow-sm focus:outline-none">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                     Stats
                 </button>
@@ -222,12 +222,12 @@
     </div>
 
     <!-- Responsive Stats Sidebar -->
-    <aside id="stats-sidebar" class="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-[#0f0f0f] border-l border-er-border transform translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col lg:w-80 h-full shadow-2xl flex flex-col z-[70] transition-transform duration-300 ease-in-out">
+    <aside id="stats-sidebar" class="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-[#0f0f0f] border-l border-er-border transform translate-x-full h-full shadow-2xl flex flex-col z-[70] transition-transform duration-300 ease-in-out">
         
         <div class="p-4 border-b border-er-border flex justify-between items-center bg-er-dark sticky top-0 z-10">
             <h2 class="text-er-gold font-serif font-bold text-lg">Character</h2>
-            <!-- Close button visible only on mobile -->
-            <button id="closeStatsBtn" class="lg:hidden text-stone-400 hover:text-white bg-er-panel p-1.5 rounded transition-colors focus:outline-none">
+            <!-- Close button -->
+            <button id="closeStatsBtn" class="text-stone-400 hover:text-white bg-er-panel p-1.5 rounded transition-colors focus:outline-none">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
@@ -726,32 +726,67 @@
                 });
             }
 
-            // Mobile Sidebar Toggles
+            // Mobile & PC Sidebar Toggles
             const toggleStatsBtn = document.getElementById('toggleStatsBtn');
             const closeStatsBtn = document.getElementById('closeStatsBtn');
             const statsSidebar = document.getElementById('stats-sidebar');
             const mobileOverlay = document.getElementById('mobile-overlay');
+            const mainContent = document.getElementById('mainContent');
 
             function openSidebar() {
                 statsSidebar.classList.remove('translate-x-full');
-                mobileOverlay.classList.remove('hidden');
-                // Small delay to allow display:block to apply before animating opacity
-                setTimeout(() => mobileOverlay.classList.remove('opacity-0'), 10);
-                document.body.style.overflow = 'hidden'; // prevent background scrolling
+                if (window.innerWidth >= 1024) {
+                    mainContent.style.marginRight = '20rem'; // Width of sidebar (w-80 = 20rem)
+                } else {
+                    mobileOverlay.classList.remove('hidden');
+                    // Small delay to allow display:block to apply before animating opacity
+                    setTimeout(() => mobileOverlay.classList.remove('opacity-0'), 10);
+                    document.body.style.overflow = 'hidden'; // prevent background scrolling
+                }
             }
 
             function closeSidebar() {
                 statsSidebar.classList.add('translate-x-full');
-                mobileOverlay.classList.add('opacity-0');
-                setTimeout(() => mobileOverlay.classList.add('hidden'), 300); // wait for transition
-                if (!document.getElementById('itemModal').classList.contains('hidden') === false) {
-                    document.body.style.overflow = ''; 
+                if (window.innerWidth >= 1024) {
+                    mainContent.style.marginRight = '0';
+                } else {
+                    mobileOverlay.classList.add('opacity-0');
+                    setTimeout(() => mobileOverlay.classList.add('hidden'), 300); // wait for transition
+                    if (!document.getElementById('itemModal').classList.contains('hidden') === false) {
+                        document.body.style.overflow = ''; 
+                    }
                 }
             }
 
             if (toggleStatsBtn) toggleStatsBtn.addEventListener('click', openSidebar);
             if (closeStatsBtn) closeStatsBtn.addEventListener('click', closeSidebar);
             if (mobileOverlay) mobileOverlay.addEventListener('click', closeSidebar);
+
+            // Open sidebar by default on large screens
+            if (window.innerWidth >= 1024) {
+                openSidebar();
+            }
+
+            // Handle resize to adjust layout dynamically
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1024) {
+                    // Switch to PC layout
+                    if (!statsSidebar.classList.contains('translate-x-full')) {
+                        mainContent.style.marginRight = '20rem';
+                    }
+                    mobileOverlay.classList.add('hidden');
+                    mobileOverlay.classList.add('opacity-0');
+                    document.body.style.overflow = '';
+                } else {
+                    // Switch to Mobile layout
+                    mainContent.style.marginRight = '0';
+                    if (!statsSidebar.classList.contains('translate-x-full')) {
+                        mobileOverlay.classList.remove('hidden');
+                        mobileOverlay.classList.remove('opacity-0');
+                        document.body.style.overflow = 'hidden';
+                    }
+                }
+            });
 
             // Dice Log Minimizer
             const diceLogHeader = document.getElementById('dice-log-header');
