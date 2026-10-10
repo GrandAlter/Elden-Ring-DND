@@ -437,6 +437,11 @@ const subclasses = [
                 name: "Starbound Fate",
                 level: 10,
                 description: "The stars alter the fate of the Carian royal family, and all glintstone mages to an extent. At 10th level, as an action once per long rest, you can change any of your prepared spells in the same manner that you would after finishing a long rest. This feature is not available to you if the stars' motion is still arrested."
+            },
+            {
+                name: "Glimpse the Primeval Current",
+                level: 14,
+                description: "Following in the steps of some of the most powerful glintstone sorcerers, at 14th level you can stare into the primeval current to empower your magic. As part of casting a spell of 1st level or higher, you may cast it as if you used a 9th-level spell slot/points. This does not allow you to cast 9th-level spells unless you have the caster levels otherwise required. You may use this ability once per long rest without additional consequences. If you use it again before finishing a long rest, you gain a level of exhaustion and your Sanity score is reduced by 1."
             }
         ]
     }

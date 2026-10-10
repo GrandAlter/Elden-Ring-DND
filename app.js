@@ -12,16 +12,6 @@ let userInventory = JSON.parse(localStorage.getItem('erInventory')) || {
     weapons: [], ashes: [], spells: [], wondrous: [], books: [], materials: [], subclasses: [], backgrounds: []
 };
 
-// Safe Data Loading
-const safeWeapons = typeof weapons !== 'undefined' ? weapons : [];
-const safeAshes = typeof ashesOfWar !== 'undefined' ? ashesOfWar : [];
-const safeSpells = typeof spells !== 'undefined' ? spells : [];
-const safeWondrous = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
-const safeBooks = typeof books !== 'undefined' ? books : [];
-const safeMaterials = typeof materials !== 'undefined' ? materials : [];
-const safeSubclasses = typeof subclasses !== 'undefined' ? subclasses : [];
-const safeBackgrounds = typeof backgrounds !== 'undefined' ? backgrounds : [];
-
 function getModifier(score) {
     return Math.floor((score - 10) / 2);
 }
@@ -263,11 +253,55 @@ function processWeaponProperties(text) {
     });
 }
 
+// ------------------------------------------------------------
+// CRITICAL FIX: Globally scoped Ash of War Compatibility Checker
+// ------------------------------------------------------------
+function isWeaponCompatibleWithAsh(weaponType, compatibilityStr) {
+    if (!compatibilityStr || !weaponType) return false;
+    const compLower = compatibilityStr.toLowerCase();
+    
+    // Explicit exclusions
+    if (compLower.includes("none") || compLower.includes("unique")) return false;
+    
+    // Explicit inclusions (e.g. "Dagger" matches "Dagger")
+    if (compLower.includes(weaponType.toLowerCase())) return true;
+
+    // Check underlying properties
+    const props = weaponTypeProperties[weaponType.toLowerCase()];
+    if (!props) return false;
+
+    // Split compatibility string by commas or 'or'
+    const conditions = compLower.replace(/ or /g, ',').split(',').map(s => s.trim());
+    
+    // Check if the ash relies on properties (like "Melee" or "Heavy") rather than explicit names
+    const isPropertyBased = conditions.some(c => ["melee", "ranged", "shield", "shields only"].includes(c));
+    
+    if (isPropertyBased) {
+        return conditions.every(cond => {
+            if (cond === "shields only" || cond === "shield") return props.includes("shield");
+            if (cond === "melee") return props.includes("melee");
+            if (cond === "ranged") return props.includes("ranged");
+            if (cond.startsWith("non-")) return !props.includes(cond.replace("non-", ""));
+            return props.includes(cond);
+        });
+    }
+    return false;
+}
+
 function linkifyText(text) {
     if (!text) return "";
     let linkedText = text;
     
     linkedText = processWeaponProperties(linkedText);
+
+    const safeWeapons = typeof weapons !== 'undefined' ? weapons : [];
+    const safeAshes = typeof ashesOfWar !== 'undefined' ? ashesOfWar : [];
+    const safeSpells = typeof spells !== 'undefined' ? spells : [];
+    const safeWondrous = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
+    const safeBooks = typeof books !== 'undefined' ? books : [];
+    const safeMaterials = typeof materials !== 'undefined' ? materials : [];
+    const safeSubclasses = typeof subclasses !== 'undefined' ? subclasses : [];
+    const safeBackgrounds = typeof backgrounds !== 'undefined' ? backgrounds : [];
 
     const linkItems = [];
     
@@ -359,40 +393,102 @@ function linkifyText(text) {
 
 // Global Routing
 window.jumpToWeapon = function(weaponName) {
-    const weapon = safeWeapons.find(w => w.name === weaponName);
+    const weapon = typeof weapons !== 'undefined' ? weapons.find(w => w.name === weaponName) : null;
     if (weapon) { closeModal(); switchTab('weapons'); document.getElementById('searchInput').value = weaponName; filterAndSort(); setTimeout(() => openModal(weapon, 'weapons'), 150); }
 };
 window.jumpToAsh = function(ashName) {
-    const ash = safeAshes.find(a => a.name === ashName);
+    const ash = typeof ashesOfWar !== 'undefined' ? ashesOfWar.find(a => a.name === ashName) : null;
     if (ash) { closeModal(); switchTab('ashes'); document.getElementById('searchInput').value = ashName; filterAndSort(); setTimeout(() => openModal(ash, 'ashes'), 150); }
 };
 window.jumpToSpell = function(spellName) {
-    const spell = safeSpells.find(s => s.name === spellName);
+    const spell = typeof spells !== 'undefined' ? spells.find(s => s.name === spellName) : null;
     if (spell) { closeModal(); switchTab('spells'); document.getElementById('searchInput').value = spellName; filterAndSort(); setTimeout(() => openModal(spell, 'spells'), 150); }
 };
 window.jumpToWondrous = function(itemName) {
-    const item = safeWondrous.find(w => w.name === itemName);
+    const item = typeof wondrousItems !== 'undefined' ? wondrousItems.find(w => w.name === itemName) : null;
     if (item) { closeModal(); switchTab('wondrous'); document.getElementById('searchInput').value = itemName; filterAndSort(); setTimeout(() => openModal(item, 'wondrous'), 150); }
 };
 window.jumpToBook = function(bookName) {
-    const book = safeBooks.find(b => b.name === bookName);
+    const book = typeof books !== 'undefined' ? books.find(b => b.name === bookName) : null;
     if (book) { closeModal(); switchTab('books'); document.getElementById('searchInput').value = bookName; filterAndSort(); setTimeout(() => openModal(book, 'books'), 150); }
 };
 window.jumpToMaterial = function(matName) {
-    const mat = safeMaterials.find(m => m.name === matName);
+    const mat = typeof materials !== 'undefined' ? materials.find(m => m.name === matName) : null;
     if (mat) { closeModal(); switchTab('materials'); document.getElementById('searchInput').value = matName; filterAndSort(); setTimeout(() => openModal(mat, 'materials'), 150); }
 };
 window.jumpToSubclass = function(subName) {
-    const sub = safeSubclasses.find(s => s.name === subName);
+    const sub = typeof subclasses !== 'undefined' ? subclasses.find(s => s.name === subName) : null;
     if (sub) { closeModal(); switchTab('subclasses'); document.getElementById('searchInput').value = subName; filterAndSort(); setTimeout(() => openModal(sub, 'subclasses'), 150); }
 };
 window.jumpToBackground = function(bgName) {
-    const bg = safeBackgrounds.find(b => b.name === bgName);
+    const bg = typeof backgrounds !== 'undefined' ? backgrounds.find(b => b.name === bgName) : null;
     if (bg) { closeModal(); switchTab('backgrounds'); document.getElementById('searchInput').value = bgName; filterAndSort(); setTimeout(() => openModal(bg, 'backgrounds'), 150); }
 };
 
+function isItemMatch(item, tab, f, query) {
+    let match = false;
+    if (item.name.toLowerCase().includes(query) || (item.description && item.description.toLowerCase().includes(query))) match = true;
+    if (tab === 'weapons' && item.skill && item.skill.name.toLowerCase().includes(query)) match = true;
+    if (tab === 'ashes' && item.compatibility && item.compatibility.toLowerCase().includes(query)) match = true;
+    if (tab === 'spells' && item.school && item.school.toLowerCase().includes(query)) match = true;
+    if (!match) return false;
+
+    if (f.letter !== 'all' && !item.name.toLowerCase().startsWith(f.letter)) return false;
+
+    if (tab === 'weapons') {
+        if (f.type !== 'all' && (item.type || '').toLowerCase() !== f.type) return false;
+        if (f.rarity !== 'all') {
+            const isUnique = !['common', 'uncommon'].includes((item.rarity || '').toLowerCase());
+            if (f.rarity === 'ashable' && isUnique) return false;
+            if (f.rarity === 'unique' && !isUnique) return false;
+            if (f.rarity !== 'ashable' && f.rarity !== 'unique' && (item.rarity || '').toLowerCase() !== f.rarity) return false;
+        }
+        if (f.affinity !== 'all' && (item.affinity || '').toLowerCase() !== f.affinity) return false;
+    } else if (tab === 'ashes') {
+        if (f.type !== 'all' && !isWeaponCompatibleWithAsh(f.type, item.compatibility)) return false;
+        if (f.rarity !== 'all') {
+            const isUnique = (item.compatibility || '').toLowerCase().includes('unique');
+            if (f.rarity === 'unique' && !isUnique) return false;
+            if (f.rarity === 'non-unique' && isUnique) return false;
+        }
+        if (f.affinity !== 'all' && (item.affinity || '').toLowerCase() !== f.affinity) return false;
+    } else if (tab === 'spells') {
+        if (f.type !== 'all' && (item.type || '').toLowerCase() !== f.type) return false;
+        if (f.school !== 'all' && (item.school || '').toLowerCase() !== f.school) return false;
+        if (f.level !== 'all' && (item.level || '').toString().toLowerCase() !== f.level) return false;
+    } else if (tab === 'wondrous') {
+        if (f.type !== 'all' && (item.type || '').toLowerCase() !== f.type) return false;
+        if (f.rarity !== 'all' && (item.rarity || '').toLowerCase() !== f.rarity) return false;
+    } else if (tab === 'books') {
+        if (f.type !== 'all' && (item.type || '').toLowerCase() !== f.type) return false;
+    } else if (tab === 'materials') {
+        if (f.rarity !== 'all' && (item.rarity || '').toLowerCase() !== f.rarity) return false;
+    } else if (tab === 'subclasses') {
+        if (f.type !== 'all' && (item.className || '').toLowerCase() !== f.type) return false;
+    }
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Stat Inputs Sync
+    // DOM Elements
+    const gridContainer = document.getElementById('gridContainer');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    
+    const filterLetter = document.getElementById('filterLetter');
+    const filterType = document.getElementById('filterType');
+    const filterRarityUnique = document.getElementById('filterRarityUnique');
+    const filterAffinity = document.getElementById('filterAffinity');
+    const filterSchool = document.getElementById('filterSchool');
+    const filterLevel = document.getElementById('filterLevel');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    
+    const statsSidebar = document.getElementById('stats-sidebar');
+    const toggleStatsBtn = document.getElementById('toggleStatsBtn');
+    const closeStatsBtn = document.getElementById('closeStatsBtn');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+    const mainContent = document.getElementById('mainContent');
+
     const statInputs = ['level', 'str', 'dex', 'con', 'int', 'wis', 'cha'];
     statInputs.forEach(stat => {
         const el = document.getElementById(stat === 'level' ? 'char-level' : `stat-${stat}`);
@@ -415,12 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentOpenItem) openModal(currentOpenItem, currentOpenItem._category || currentTab); 
         });
     }
-
-    const toggleStatsBtn = document.getElementById('toggleStatsBtn');
-    const closeStatsBtn = document.getElementById('closeStatsBtn');
-    const statsSidebar = document.getElementById('stats-sidebar');
-    const mobileOverlay = document.getElementById('mobile-overlay');
-    const mainContent = document.getElementById('mainContent');
 
     function openSidebar() {
         statsSidebar.classList.remove('translate-x-full');
@@ -482,22 +572,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Tabs Event Listeners
     const tabElements = ['Inventory', 'Weapons', 'Ashes', 'Spells', 'Wondrous', 'Books', 'Materials', 'Subclasses', 'Backgrounds'];
     tabElements.forEach(tabName => {
         const btn = document.getElementById(`tab${tabName}`);
         if (btn) btn.addEventListener('click', () => switchTab(tabName.toLowerCase()));
     });
-
-    const searchInput = document.getElementById('searchInput');
-    const sortSelect = document.getElementById('sortSelect');
-    const filterLetter = document.getElementById('filterLetter');
-    const filterType = document.getElementById('filterType');
-    const filterRarityUnique = document.getElementById('filterRarityUnique');
-    const filterAffinity = document.getElementById('filterAffinity');
-    const filterSchool = document.getElementById('filterSchool');
-    const filterLevel = document.getElementById('filterLevel');
-    const resetFiltersBtn = document.getElementById('resetFilters');
 
     [searchInput, sortSelect, filterLetter, filterType, filterRarityUnique, filterAffinity, filterSchool, filterLevel]
         .forEach(el => {
@@ -547,7 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab('weapons');
 });
 
-// Tab & Filter Logic
 function switchTab(tab) {
     currentTab = tab;
     
@@ -820,23 +898,29 @@ function filterAndSort() {
 
     const query = searchInput.value.toLowerCase();
     const sortVal = document.getElementById('sortSelect').value;
-    const letterVal = document.getElementById('filterLetter').value;
-    const typeVal = document.getElementById('filterType') ? document.getElementById('filterType').value : 'all';
-    const rarityVal = document.getElementById('filterRarityUnique') ? document.getElementById('filterRarityUnique').value : 'all';
-    const affinVal = document.getElementById('filterAffinity') ? document.getElementById('filterAffinity').value : 'all';
     
-    let filtered = [];
-
+    // Read Current Filter States
+    const activeFilters = {
+        letter: document.getElementById('filterLetter').value,
+        type: document.getElementById('filterType') ? document.getElementById('filterType').value : 'all',
+        rarity: document.getElementById('filterRarityUnique') ? document.getElementById('filterRarityUnique').value : 'all',
+        affinity: document.getElementById('filterAffinity') ? document.getElementById('filterAffinity').value : 'all',
+        school: document.getElementById('filterSchool') ? document.getElementById('filterSchool').value : 'all',
+        level: document.getElementById('filterLevel') ? document.getElementById('filterLevel').value : 'all'
+    };
+    
+    // Dataset Determination
+    let dataset = [];
     if (currentTab === 'inventory') {
         const allGroups = [
-            { cat: 'weapons', data: safeWeapons },
-            { cat: 'ashes', data: safeAshes },
-            { cat: 'spells', data: safeSpells },
-            { cat: 'wondrous', data: safeWondrous },
-            { cat: 'books', data: safeBooks },
-            { cat: 'materials', data: safeMaterials },
-            { cat: 'subclasses', data: safeSubclasses },
-            { cat: 'backgrounds', data: safeBackgrounds }
+            { cat: 'weapons', data: typeof weapons !== 'undefined' ? weapons : [] },
+            { cat: 'ashes', data: typeof ashesOfWar !== 'undefined' ? ashesOfWar : [] },
+            { cat: 'spells', data: typeof spells !== 'undefined' ? spells : [] },
+            { cat: 'wondrous', data: typeof wondrousItems !== 'undefined' ? wondrousItems : [] },
+            { cat: 'books', data: typeof books !== 'undefined' ? books : [] },
+            { cat: 'materials', data: typeof materials !== 'undefined' ? materials : [] },
+            { cat: 'subclasses', data: typeof subclasses !== 'undefined' ? subclasses : [] },
+            { cat: 'backgrounds', data: typeof backgrounds !== 'undefined' ? backgrounds : [] }
         ];
 
         allGroups.forEach(group => {
@@ -844,191 +928,118 @@ function filterAndSort() {
             savedNames.forEach(name => {
                 const itemData = group.data.find(x => x.name === name);
                 if (itemData) {
-                    filtered.push({ ...itemData, _category: group.cat });
+                    dataset.push({ ...itemData, _category: group.cat });
                 }
             });
         });
-
-        filtered = filtered.filter(item => {
-            let match = item.name.toLowerCase().includes(query) || (item.description && item.description.toLowerCase().includes(query));
-            if (!match) return false;
-            if (letterVal !== 'all' && !item.name.toLowerCase().startsWith(letterVal)) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            return a.name.localeCompare(b.name);
-        });
-
-    } else if (currentTab === 'weapons' && typeof weapons !== 'undefined') {
-        filtered = weapons.filter(w => {
-            let match = w.name.toLowerCase().includes(query) || w.type.toLowerCase().includes(query) || (w.skill && w.skill.name.toLowerCase().includes(query));
-            if (!match) return false;
-            if (letterVal !== 'all' && !w.name.toLowerCase().startsWith(letterVal)) return false;
-            if (typeVal !== 'all' && w.type.toLowerCase() !== typeVal) return false;
-            
-            if (rarityVal !== 'all') {
-                const isUnique = !['common', 'uncommon'].includes(w.rarity.toLowerCase());
-                if (rarityVal === 'ashable' && isUnique) return false;
-                if (rarityVal === 'unique' && !isUnique) return false;
-                if (rarityVal !== 'ashable' && rarityVal !== 'unique' && w.rarity.toLowerCase() !== rarityVal) return false;
-            }
-            if (affinVal !== 'all' && w.affinity.toLowerCase() !== affinVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'rarity_desc') return (rarityWeights[b.rarity.toLowerCase()] || 0) - (rarityWeights[a.rarity.toLowerCase()] || 0);
-            if (sortVal === 'rarity_asc') return (rarityWeights[a.rarity.toLowerCase()] || 0) - (rarityWeights[b.rarity.toLowerCase()] || 0);
-            if (sortVal === 'type_asc') return a.type.localeCompare(b.type);
-            if (sortVal === 'affinity_asc') return a.affinity.localeCompare(b.affinity);
-            return 0;
-        });
-
-    } else if (currentTab === 'ashes' && typeof ashesOfWar !== 'undefined') {
-        filtered = ashesOfWar.filter(a => {
-            let match = a.name.toLowerCase().includes(query) || a.compatibility.toLowerCase().includes(query) || a.description.toLowerCase().includes(query);
-            if (!match) return false;
-            if (letterVal !== 'all' && !a.name.toLowerCase().startsWith(letterVal)) return false;
-            if (typeVal !== 'all' && !isWeaponCompatibleWithAsh(typeVal, a.compatibility)) return false;
-            
-            if (rarityVal !== 'all') {
-                const isUnique = a.compatibility.toLowerCase().includes('unique');
-                if (rarityVal === 'unique' && !isUnique) return false;
-                if (rarityVal === 'non-unique' && isUnique) return false;
-            }
-            if (affinVal !== 'all' && a.affinity.toLowerCase() !== affinVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'cost_desc') return b.sp - a.sp;
-            if (sortVal === 'cost_asc') return a.sp - b.sp;
-            if (sortVal === 'compat_asc') return a.compatibility.localeCompare(b.compatibility);
-            if (sortVal === 'affinity_asc') return a.affinity.localeCompare(b.affinity);
-            return 0;
-        });
-
-    } else if (currentTab === 'spells' && typeof spells !== 'undefined') {
-        const schoolVal = document.getElementById('filterSchool') ? document.getElementById('filterSchool').value : 'all';
-        const levelVal = document.getElementById('filterLevel') ? document.getElementById('filterLevel').value : 'all';
-
-        filtered = spells.filter(s => {
-            let match = s.name.toLowerCase().includes(query) || s.school.toLowerCase().includes(query) || s.description.toLowerCase().includes(query);
-            if (!match) return false;
-            if (letterVal !== 'all' && !s.name.toLowerCase().startsWith(letterVal)) return false;
-            if (typeVal !== 'all' && s.type.toLowerCase() !== typeVal) return false;
-            if (schoolVal !== 'all' && s.school.toLowerCase() !== schoolVal) return false;
-            if (levelVal !== 'all' && s.level.toString().toLowerCase() !== levelVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'type_asc') return a.type.localeCompare(b.type);
-            if (sortVal === 'school_asc') return a.school.localeCompare(b.school);
-            if (sortVal === 'level_asc' || sortVal === 'level_desc') {
-                const lvlA = a.level === 'Cantrip' ? -1 : parseInt(a.level);
-                const lvlB = b.level === 'Cantrip' ? -1 : parseInt(b.level);
-                return sortVal === 'level_asc' ? lvlA - lvlB : lvlB - lvlA;
-            }
-            return 0;
-        });
-        
-    } else if (currentTab === 'wondrous' && typeof wondrousItems !== 'undefined') {
-        filtered = wondrousItems.filter(w => {
-            let match = w.name.toLowerCase().includes(query) || w.type.toLowerCase().includes(query) || w.description.toLowerCase().includes(query);
-            if (!match) return false;
-            if (letterVal !== 'all' && !w.name.toLowerCase().startsWith(letterVal)) return false;
-            if (typeVal !== 'all' && w.type.toLowerCase() !== typeVal) return false;
-            if (rarityVal !== 'all' && w.rarity.toLowerCase() !== rarityVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'rarity_desc') return (rarityWeights[b.rarity.toLowerCase()] || 0) - (rarityWeights[a.rarity.toLowerCase()] || 0);
-            if (sortVal === 'rarity_asc') return (rarityWeights[a.rarity.toLowerCase()] || 0) - (rarityWeights[b.rarity.toLowerCase()] || 0);
-            if (sortVal === 'type_asc') return a.type.localeCompare(b.type);
-            return 0;
-        });
-        
-    } else if (currentTab === 'books' && typeof books !== 'undefined') {
-        filtered = books.filter(b => {
-            let match = b.name.toLowerCase().includes(query) || b.description.toLowerCase().includes(query);
-            if (!match) return false;
-            if (letterVal !== 'all' && !b.name.toLowerCase().startsWith(letterVal)) return false;
-            if (typeVal !== 'all' && b.type.toLowerCase() !== typeVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'type_asc') return a.type.localeCompare(b.type) || a.name.localeCompare(b.name);
-            if (sortVal === 'type_desc') return b.type.localeCompare(a.type) || a.name.localeCompare(b.name);
-            return 0;
-        });
-        
-    } else if (currentTab === 'materials' && typeof materials !== 'undefined') {
-        filtered = materials.filter(m => {
-            let match = m.name.toLowerCase().includes(query) || m.description.toLowerCase().includes(query);
-            if (!match) return false;
-            if (letterVal !== 'all' && !m.name.toLowerCase().startsWith(letterVal)) return false;
-            if (rarityVal !== 'all' && m.rarity.toLowerCase() !== rarityVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'rarity_desc') return (rarityWeights[b.rarity.toLowerCase()] || 0) - (rarityWeights[a.rarity.toLowerCase()] || 0);
-            if (sortVal === 'rarity_asc') return (rarityWeights[a.rarity.toLowerCase()] || 0) - (rarityWeights[b.rarity.toLowerCase()] || 0);
-            return 0;
-        });
-    } else if (currentTab === 'subclasses' && typeof subclasses !== 'undefined') {
-        filtered = subclasses.filter(s => {
-            let match = s.name.toLowerCase().includes(query) || (s.description && s.description.toLowerCase().includes(query));
-            if (!match) return false;
-            if (letterVal !== 'all' && !s.name.toLowerCase().startsWith(letterVal)) return false;
-            if (typeVal !== 'all' && (s.className || "").toLowerCase() !== typeVal) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            if (sortVal === 'type_asc') return (a.className||"").localeCompare(b.className||"") || a.name.localeCompare(b.name);
-            if (sortVal === 'type_desc') return (b.className||"").localeCompare(a.className||"") || a.name.localeCompare(b.name);
-            return 0;
-        });
-    } else if (currentTab === 'backgrounds' && typeof backgrounds !== 'undefined') {
-        filtered = backgrounds.filter(bg => {
-            let match = bg.name.toLowerCase().includes(query) || (bg.description && bg.description.toLowerCase().includes(query));
-            if (!match) return false;
-            if (letterVal !== 'all' && !bg.name.toLowerCase().startsWith(letterVal)) return false;
-            return true;
-        });
-
-        filtered.sort((a, b) => {
-            if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
-            if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
-            return 0;
-        });
+    } else {
+        if (currentTab === 'weapons') dataset = typeof weapons !== 'undefined' ? weapons : [];
+        else if (currentTab === 'ashes') dataset = typeof ashesOfWar !== 'undefined' ? ashesOfWar : [];
+        else if (currentTab === 'spells') dataset = typeof spells !== 'undefined' ? spells : [];
+        else if (currentTab === 'wondrous') dataset = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
+        else if (currentTab === 'books') dataset = typeof books !== 'undefined' ? books : [];
+        else if (currentTab === 'materials') dataset = typeof materials !== 'undefined' ? materials : [];
+        else if (currentTab === 'subclasses') dataset = typeof subclasses !== 'undefined' ? subclasses : [];
+        else if (currentTab === 'backgrounds') dataset = typeof backgrounds !== 'undefined' ? backgrounds : [];
     }
 
+    // 1. Filter Dataset
+    let filtered = dataset.filter(item => isItemMatch(item, currentTab === 'inventory' ? item._category : currentTab, activeFilters, query));
+
+    // 2. Cascade Dropdowns (Hide/Disable invalid options)
+    if (currentTab !== 'inventory' && currentTab !== 'backgrounds') {
+        const updateDropdown = (id, key, extractor) => {
+            const sel = document.getElementById(id);
+            if (!sel || sel.classList.contains('hidden')) return;
+            
+            const testF = { ...activeFilters, [key]: 'all' };
+            const valids = dataset.filter(i => isItemMatch(i, currentTab, testF, query));
+            
+            const validSet = new Set();
+            valids.forEach(i => {
+                const v = extractor(i);
+                if (Array.isArray(v)) v.forEach(x => { if(x) validSet.add(x.toLowerCase()) });
+                else if (v) validSet.add(v.toLowerCase());
+            });
+
+            let needsReset = false;
+            Array.from(sel.options).forEach(opt => {
+                if (opt.value === 'all') return;
+                const isAvail = validSet.has(opt.value.toLowerCase());
+                opt.disabled = !isAvail;
+                opt.style.display = isAvail ? '' : 'none';
+                if (!isAvail && sel.value === opt.value) needsReset = true;
+            });
+
+            if (needsReset) {
+                sel.value = 'all';
+                setTimeout(filterAndSort, 0);
+            }
+        };
+
+        updateDropdown('filterLetter', 'letter', i => i.name.charAt(0));
+        
+        updateDropdown('filterType', 'type', i => {
+            if (currentTab === 'ashes') {
+                let t = [];
+                if (i.compatibility && !i.compatibility.toLowerCase().includes('unique') && i.compatibility !== 'None') {
+                    i.compatibility.replace(/ or /g, ',').split(',').forEach(c => {
+                        let cl = c.trim().toLowerCase();
+                        if (!["melee", "ranged", "shield", "shields only"].includes(cl) && !cl.startsWith("non-")) t.push(cl);
+                    });
+                }
+                return t;
+            }
+            return i.className || i.type;
+        });
+
+        updateDropdown('filterRarityUnique', 'rarity', i => {
+            if (currentTab === 'weapons') return [i.rarity, !['common', 'uncommon'].includes((i.rarity||'').toLowerCase()) ? 'unique' : 'ashable'];
+            if (currentTab === 'ashes') return (i.compatibility||'').toLowerCase().includes('unique') ? 'unique' : 'non-unique';
+            return i.rarity;
+        });
+
+        updateDropdown('filterAffinity', 'affinity', i => i.affinity);
+        updateDropdown('filterSchool', 'school', i => i.school);
+        updateDropdown('filterLevel', 'level', i => i.level ? i.level.toString() : '');
+    }
+
+    // 3. Sorting
+    filtered.sort((a, b) => {
+        if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
+        if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
+        if (sortVal === 'rarity_desc') return (rarityWeights[(b.rarity || '').toLowerCase()] || 0) - (rarityWeights[(a.rarity || '').toLowerCase()] || 0);
+        if (sortVal === 'rarity_asc') return (rarityWeights[(a.rarity || '').toLowerCase()] || 0) - (rarityWeights[(b.rarity || '').toLowerCase()] || 0);
+        if (sortVal === 'type_asc') return (a.type || a.className || '').localeCompare(b.type || b.className || '');
+        if (sortVal === 'type_desc') return (b.type || b.className || '').localeCompare(a.type || a.className || '');
+        if (sortVal === 'affinity_asc') return (a.affinity || '').localeCompare(b.affinity || '');
+        if (sortVal === 'cost_desc') return (b.sp || 0) - (a.sp || 0);
+        if (sortVal === 'cost_asc') return (a.sp || 0) - (b.sp || 0);
+        if (sortVal === 'compat_asc') return (a.compatibility || '').localeCompare(b.compatibility || '');
+        if (sortVal === 'school_asc') return (a.school || '').localeCompare(b.school || '');
+        if (sortVal === 'level_asc' || sortVal === 'level_desc') {
+            const lvlA = a.level === 'Cantrip' ? -1 : parseInt(a.level || 0);
+            const lvlB = b.level === 'Cantrip' ? -1 : parseInt(b.level || 0);
+            return sortVal === 'level_asc' ? lvlA - lvlB : lvlB - lvlA;
+        }
+        return 0;
+    });
+
+    // 4. Update UI
     const itemCount = document.getElementById('itemCount');
     if (itemCount) {
-        const typeName = currentTab === 'weapons' ? 'Armaments' : currentTab === 'ashes' ? 'Ashes of War' : currentTab === 'wondrous' ? 'Relics & Items' : currentTab === 'books' ? 'Tomes & Recipes' : currentTab === 'materials' ? 'Materials' : currentTab === 'inventory' ? 'Inventory Items' : currentTab === 'subclasses' ? 'Subclasses' : currentTab === 'backgrounds' ? 'Backgrounds' : 'Spells';
-        itemCount.innerHTML = `Showing <span class="text-er-gold font-bold text-sm">${filtered.length}</span> ${typeName}`;
+        const typeNames = {
+            'weapons': 'Armaments',
+            'ashes': 'Ashes of War',
+            'spells': 'Spells',
+            'wondrous': 'Relics & Items',
+            'books': 'Tomes & Recipes',
+            'materials': 'Materials',
+            'inventory': 'Inventory Items',
+            'subclasses': 'Subclasses',
+            'backgrounds': 'Backgrounds'
+        };
+        itemCount.innerHTML = `Showing <span class="text-er-gold font-bold text-sm">${filtered.length}</span> ${typeNames[currentTab] || 'Items'}`;
     }
 
     renderItems(filtered);
@@ -1075,7 +1086,7 @@ function renderItems(items) {
                 }
             }
 
-            const isUnique = !['common', 'uncommon'].includes(item.rarity.toLowerCase());
+            const isUnique = !['common', 'uncommon'].includes((item.rarity || '').toLowerCase());
             const skillColorClass = isUnique ? 'text-er-gold' : 'text-stone-300';
 
             bottomInfo = `
@@ -1098,7 +1109,7 @@ function renderItems(items) {
                 </div>
             `;
         } else if (itemCat === 'ashes') {
-            const isUnique = item.compatibility.toLowerCase().includes('unique');
+            const isUnique = (item.compatibility || '').toLowerCase().includes('unique');
             topTags = `
                 <span class="text-xs font-semibold uppercase tracking-wider ${isUnique ? 'text-rarity-very-rare' : 'text-stone-400'}">${isUnique ? 'Unique Skill' : 'Ash of War'}</span>
                 <span class="text-xs bg-er-dark border border-er-border px-2 py-0.5 rounded text-stone-300 font-bold">${item.sp} SP</span>
@@ -1112,7 +1123,7 @@ function renderItems(items) {
                 </div>
             `;
         } else if (itemCat === 'spells') {
-            const isSorcery = item.type.toLowerCase() === 'sorcery';
+            const isSorcery = (item.type || '').toLowerCase() === 'sorcery';
             titleColor = isSorcery ? 'text-magic-sorcery' : 'text-magic-incantation';
             const lvlText = item.level === 'Cantrip' ? 'Cantrip' : `Level ${item.level}`;
             topTags = `
@@ -1131,7 +1142,7 @@ function renderItems(items) {
                 <span class="text-xs text-stone-500 font-semibold uppercase tracking-wider">${item.type}</span>
             `;
         } else if (itemCat === 'books') {
-            const isCook = item.type.toLowerCase() === 'cookbook';
+            const isCook = (item.type || '').toLowerCase() === 'cookbook';
             titleColor = isCook ? 'text-orange-400' : 'text-purple-400';
             topTags = `
                 <span class="text-xs font-semibold uppercase tracking-wider ${titleColor}">${item.type}</span>
@@ -1172,7 +1183,7 @@ function renderItems(items) {
             `;
         }
 
-        const inventoryIndicator = currentTab === 'inventory' ? `<div class="absolute -top-1 -right-1 bg-er-gold text-er-dark text-[9px] font-bold px-2 py-1 uppercase rounded-bl-lg tracking-wider">${itemCat.replace('wondrous', 'relic')}</div>` : '';
+        const inventoryIndicator = currentTab === 'inventory' ? `<div class="absolute top-0 right-0 bg-er-gold text-er-dark text-[9px] font-bold px-2 py-1 uppercase rounded-bl-lg tracking-wider">${itemCat.replace('wondrous', 'relic')}</div>` : '';
 
         card.innerHTML = `
             ${inventoryIndicator}
@@ -1190,8 +1201,8 @@ function renderItems(items) {
 function openModal(item, category = currentTab) {
     const modal = document.getElementById('itemModal');
     if (!modal) return;
-    
     currentOpenItem = item;
+    
     const titleEl = document.getElementById('modalTitle');
     const dynamicStatsEl = document.getElementById('modalDynamicStats');
     const invBtn = document.getElementById('modalInventoryBtn');
@@ -1269,8 +1280,8 @@ function openModal(item, category = currentTab) {
             <div class="flex flex-wrap items-center gap-4 text-sm bg-er-panel border border-stone-700 rounded p-2 text-stone-300">
                 <button class="roll-btn" onclick="executeRoll('1d20', '${atkBonus}', 'Weapon Attack (${item.affinity})')" title="Roll Attack">
                     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                    Attack: ${atkBonus}
-                </button>
+                        Attack: ${atkBonus}
+                    </button>
             </div>
         `;
 
