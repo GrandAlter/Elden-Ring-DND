@@ -118,28 +118,27 @@
         }
     </style>
 </head>
-<!-- Replaced h-screen with h-[100dvh] to fix mobile browser bar clipping -->
 <body class="text-stone-300 font-sans h-[100dvh] flex flex-col overflow-hidden">
 
     <!-- Main Content Area -->
     <div id="mainContent" class="flex-1 flex flex-col min-w-0 h-full relative z-0 transition-all duration-300">
-        <header class="shrink-0 py-3 px-4 sm:px-6 border-b border-er-border bg-er-dark/95 backdrop-blur-md z-20 shadow-lg flex flex-col gap-3">
+        <header class="shrink-0 py-2 px-3 sm:py-3 sm:px-6 border-b border-er-border bg-er-dark/95 backdrop-blur-md z-20 shadow-lg flex flex-col gap-2 sm:gap-3">
             
             <!-- Top Row: Title & Mobile Toggle -->
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between gap-2 sm:gap-3">
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <h1 class="text-lg sm:text-xl text-er-gold font-serif font-bold tracking-wide truncate">Elden Ring D&D</h1>
+                    <h1 class="text-base sm:text-xl text-er-gold font-serif font-bold tracking-wide truncate">Elden Ring D&D</h1>
                     <span class="hidden sm:inline-block text-stone-500 text-xs uppercase tracking-widest border-l border-stone-700 pl-3">Database</span>
                 </div>
                 <!-- Stats Toggle Button -->
-                <button id="toggleStatsBtn" class="flex items-center gap-2 bg-er-panel border border-er-border px-3 py-1.5 rounded text-xs text-er-gold hover:text-white hover:border-er-gold transition-colors shadow-sm focus:outline-none">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                <button id="toggleStatsBtn" class="flex items-center gap-1.5 sm:gap-2 bg-er-panel border border-er-border px-2 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-xs text-er-gold hover:text-white hover:border-er-gold transition-colors shadow-sm focus:outline-none">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                     Stats
                 </button>
             </div>
 
             <!-- Navigation Tabs -->
-            <div class="flex gap-4 sm:gap-6 font-serif text-xs sm:text-sm tracking-widest uppercase overflow-x-auto hide-scrollbar whitespace-nowrap pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div class="flex gap-3 sm:gap-6 font-serif text-[10px] sm:text-sm tracking-widest uppercase overflow-x-auto hide-scrollbar whitespace-nowrap pb-0.5 sm:pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
                 <button id="tabInventory" class="pb-1 tab-inactive shrink-0 text-er-gold">Inventory</button>
                 <div class="w-px bg-stone-700 mx-1 shrink-0"></div>
                 <button id="tabWeapons" class="pb-1 tab-active shrink-0 text-er-gold font-bold">Armory</button>
@@ -154,15 +153,15 @@
             </div>
             
             <!-- Search and Sort Row -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full items-center">
-                <div class="relative w-full">
-                    <input type="text" id="searchInput" placeholder="Search entries..." class="w-full bg-er-panel border border-er-border rounded py-2 sm:py-1.5 pl-3 pr-8 text-sm sm:text-xs text-stone-200 focus:outline-none focus:border-er-gold focus:ring-1 focus:ring-er-gold transition-colors">
-                    <svg class="w-4 h-4 absolute right-2.5 top-2.5 sm:top-1.5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <div class="flex flex-row gap-2 w-full items-center">
+                <div class="relative flex-1">
+                    <input type="text" id="searchInput" placeholder="Search entries..." class="w-full bg-er-panel border border-er-border rounded py-1 sm:py-1.5 pl-2 pr-6 text-[10px] sm:text-xs text-stone-200 focus:outline-none focus:border-er-gold focus:ring-1 focus:ring-er-gold transition-colors">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 absolute right-2 top-1.5 sm:top-1.5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 
-                <div class="flex items-center gap-2 w-full">
-                    <label for="sortSelect" class="text-stone-400 font-serif text-xs whitespace-nowrap hidden sm:block">Sort:</label>
-                    <select id="sortSelect" class="w-full bg-er-panel border border-er-border rounded py-2 sm:py-1.5 px-2 text-sm sm:text-xs text-stone-200 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-1">
+                    <label for="sortSelect" class="text-stone-400 font-serif text-[10px] sm:text-xs whitespace-nowrap hidden sm:block">Sort:</label>
+                    <select id="sortSelect" class="w-full bg-er-panel border border-er-border rounded py-1 sm:py-1.5 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-200 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                         <option value="alpha_asc">Alphabetical (A-Z)</option>
                         <option value="alpha_desc">Alphabetical (Z-A)</option>
                         <!-- Dynamic options added by JS -->
@@ -171,25 +170,25 @@
             </div>
 
             <!-- Dynamic Filters -->
-            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-er-border/50">
-                <span class="text-stone-500 font-serif text-xs uppercase tracking-widest hidden md:block mr-1">Filter:</span>
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1.5 sm:pt-2 border-t border-er-border/50">
+                <span class="text-stone-500 font-serif text-[10px] sm:text-xs uppercase tracking-widest hidden md:block mr-1">Filter:</span>
                 
-                <select id="filterLetter" class="flex-1 min-w-[80px] sm:flex-none bg-er-panel border border-er-border rounded py-2 sm:py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <select id="filterLetter" class="flex-1 min-w-[60px] sm:min-w-[80px] sm:flex-none bg-er-panel border border-er-border rounded py-1 sm:py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                     <option value="all">Any Letter</option>
                     <!-- Generated by JS -->
                 </select>
 
-                <select id="filterType" class="flex-1 min-w-[120px] sm:flex-none bg-er-panel border border-er-border rounded py-2 sm:py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <select id="filterType" class="flex-1 min-w-[90px] sm:min-w-[120px] sm:flex-none bg-er-panel border border-er-border rounded py-1 sm:py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                     <option value="all">Any Category</option>
                     <!-- Generated by JS -->
                 </select>
 
-                <select id="filterRarityUnique" class="flex-1 min-w-[140px] sm:flex-none bg-er-panel border border-er-border rounded py-2 sm:py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <select id="filterRarityUnique" class="flex-1 min-w-[100px] sm:min-w-[140px] sm:flex-none bg-er-panel border border-er-border rounded py-1 sm:py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                     <option value="all">Any Rarity</option>
                     <!-- Generated by JS -->
                 </select>
 
-                <select id="filterAffinity" class="flex-1 min-w-[100px] sm:flex-none bg-er-panel border border-er-border rounded py-2 sm:py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <select id="filterAffinity" class="flex-1 min-w-[70px] sm:min-w-[100px] sm:flex-none bg-er-panel border border-er-border rounded py-1 sm:py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                     <option value="all">Any Affinity</option>
                     <option value="strength">Strength</option>
                     <option value="dexterity">Dexterity</option>
@@ -200,23 +199,22 @@
                     <option value="none">None</option>
                 </select>
                 
-                <select id="filterSchool" class="hidden flex-1 min-w-[120px] sm:flex-none bg-er-panel border border-er-border rounded py-2 sm:py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <select id="filterSchool" class="hidden flex-1 min-w-[90px] sm:min-w-[120px] sm:flex-none bg-er-panel border border-er-border rounded py-1 sm:py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                     <option value="all">Any School</option>
                 </select>
 
-                <select id="filterLevel" class="hidden flex-1 min-w-[100px] sm:flex-none bg-er-panel border border-er-border rounded py-2 sm:py-1 px-2 text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
+                <select id="filterLevel" class="hidden flex-1 min-w-[70px] sm:min-w-[100px] sm:flex-none bg-er-panel border border-er-border rounded py-1 sm:py-1 px-1 sm:px-2 text-[10px] sm:text-xs text-stone-300 focus:outline-none focus:border-er-gold transition-colors appearance-none cursor-pointer">
                     <option value="all">Any Level</option>
                 </select>
                 
-                <button id="resetFilters" class="w-full sm:w-auto text-xs text-stone-400 hover:text-er-gold transition-colors underline decoration-stone-600 hover:decoration-er-gold underline-offset-2 py-2 sm:py-1 text-center mt-1 sm:mt-0 sm:ml-auto">Reset All</button>
+                <button id="resetFilters" class="w-full sm:w-auto text-[10px] sm:text-xs text-stone-400 hover:text-er-gold transition-colors underline decoration-stone-600 hover:decoration-er-gold underline-offset-2 py-1 text-center mt-1 sm:mt-0 sm:ml-auto">Reset</button>
             </div>
-            
-            <div id="itemCount" class="text-xs text-stone-500 text-center sm:text-left mt-1 sm:mt-0"></div>
         </header>
 
         <!-- Added padding bottom to prevent floating dice log from covering bottom items on mobile -->
         <div class="flex-1 overflow-y-auto w-full relative pb-16">
-            <main class="p-4 sm:p-6 w-full max-w-7xl mx-auto">
+            <main class="p-3 sm:p-6 w-full max-w-7xl mx-auto">
+                <div id="itemCount" class="text-[10px] sm:text-xs text-stone-500 text-center sm:text-left mb-3 font-serif tracking-widest uppercase"></div>
                 <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                     <!-- Cards injected via JavaScript -->
                 </div>
@@ -229,8 +227,8 @@
         </div>
     </div>
 
-    <!-- Responsive Stats Sidebar (Using h-[100dvh] for mobile precision) -->
-    <aside id="stats-sidebar" class="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-[#0f0f0f] border-l border-er-border transform translate-x-full h-[100dvh] shadow-2xl flex flex-col z-[70] transition-transform duration-300 ease-in-out">
+    <!-- Responsive Stats Sidebar -->
+    <aside id="stats-sidebar" class="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-[#0f0f0f] border-l border-er-border transform translate-x-full h-full shadow-2xl flex flex-col z-[70] transition-transform duration-300 ease-in-out">
         
         <div class="p-4 border-b border-er-border flex justify-between items-center bg-er-dark sticky top-0 z-10">
             <h2 class="text-er-gold font-serif font-bold text-lg">Character</h2>
@@ -239,8 +237,7 @@
             </button>
         </div>
 
-        <!-- Added pb-24 to ensure the bottom fields are not cut off by mobile swipe UI -->
-        <div class="p-4 pb-24 flex-1 overflow-y-auto hide-scrollbar space-y-5">
+        <div class="p-4 flex-1 overflow-y-auto hide-scrollbar space-y-5">
             <div class="flex items-center justify-between bg-er-panel p-3 rounded-lg border border-er-border shadow-inner">
                 <span class="text-sm uppercase tracking-widest text-stone-400 font-bold">Level</span>
                 <input type="number" id="char-level" min="1" max="20" value="1" class="w-16 bg-er-dark border border-stone-600 rounded px-2 py-1 text-white text-center font-mono focus:outline-none focus:border-er-gold">
@@ -301,17 +298,17 @@
 
     <div id="mobile-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden lg:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
 
-    <!-- Detail Modal (Using max-h-[90dvh] for mobile precision) -->
+    <!-- Detail Modal -->
     <div id="itemModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-2 sm:p-4">
         <div id="modalBackdrop" class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"></div>
-        <div class="relative bg-er-dark border border-er-border rounded-xl shadow-2xl w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[90dvh] overflow-hidden flex flex-col modal-enter">
+        <div class="relative bg-er-dark border border-er-border rounded-xl shadow-2xl w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col modal-enter">
             
             <button id="closeModalBtn" class="absolute top-3 right-3 sm:top-4 sm:right-4 text-stone-400 hover:text-white bg-er-panel rounded-full p-2 transition-colors z-10 shadow-md focus:outline-none border border-stone-700 hover:border-er-gold">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
 
-            <!-- Modal Content (Scrollable Inner) with extra bottom padding -->
-            <div class="p-4 sm:p-6 md:p-8 pb-12 overflow-y-auto hide-scrollbar w-full">
+            <!-- Modal Content (Scrollable Inner) -->
+            <div class="p-4 sm:p-6 md:p-8 overflow-y-auto hide-scrollbar w-full">
                 
                 <div class="mb-4 sm:mb-6 border-b border-er-border pb-4 pr-8">
                     <!-- Title and Inventory Button Row -->
