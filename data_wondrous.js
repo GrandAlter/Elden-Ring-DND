@@ -149,10 +149,10 @@ const wondrousItems = [
     {
         name: "Blue Dancer Charm",
         type: "Talisman",
-        rarity: "Uncommon",
+        rarity: "Rare",
         craftable: false,
         description: "<i>A cloth doll depicting a dancer garbed in blue. An ancient heirloom of some sort. Raises attack power with lower equipment load. The dancer in blue represents a fairy, who in legend bestowed a flowing sword upon a blind swordsman. Blade in hand, the swordsman sealed away an ancient god - a god that was Rot itself.</i>",
-        effect: "While wearing this talisman, you gain a +2 bonus to AC if you are wearing no armor and using no shield."
+        effect: "While wearing this talisman, you gain a +2 bonus to Attack and Damage Roll if you are wearing no armor and using no shield."
     },
     {
         name: "Blue-feathered Branchsword",
@@ -214,8 +214,9 @@ const wondrousItems = [
         name: "Burred Ammunition",
         type: "Ammunition",
         rarity: "Uncommon",
-        craftable: false,
+        craftable: true,
         description: "<i>Bolt covered in thorns. One of the most horrific weapons used in the Shattering. Afflicts with blood loss. Difficult to remove once buried in flesh, causes appalling damage to the body.</i>",
+        recipe: "3 Beast Carcass, 1 Bloodrose\nFound in: Nomadic Warrior's Cookbook [6]",
         effect: "When a target is hit by a ranged weapon attack using this piece of magical ammunition, the target suffers from Bleed 1. Once it hits a target, the ammunition is no longer magical."
     },
     {
@@ -284,6 +285,15 @@ const wondrousItems = [
         recipe: "5 Rowa Fruit, 1 Beast Carcass, 1 Slumbering Egg, 1 Eye of Yelough\nFound in: Nomadic Warrior's Cookbook [23]",
         description: "<i>Cured strip of meat, dried out after pickling in a purple medicinal solution. Craftable item. Temporarily boosts focus. Higher focus helps to mitigate the buildup of sleep and madness.</i>",
         effect: "Consuming this meat invigorates the body, granting the user advantage on saving throws against being stunned or put unconscious for 1 minute."
+    },
+    {
+        name: "Clarifying White Cured Meat",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        recipe: "5 Rowa Fruit, 1 Strip of White Flesh, 1 Slumbering Egg, 1 Eye of Yelough\nFound in: Nomadic Warrior's Cookbook [23]",
+        description: "<i>Cured strip of white flesh, dried out after pickling in a purple medicinal solution. Craftable item. Temporarily boosts focus. Higher focus helps to mitigate the buildup of sleep and madness. Lasts longer than traditional cured meat, but with reduced effectiveness.</i>",
+        effect: "Consuming this meat invigorates the body, For 1 hour after consuming this meat, you can add +1 to saving throws being stunned or put unconscious."
     },
     {
         name: "Clarifying Horn Charm",
@@ -439,6 +449,15 @@ const wondrousItems = [
         recipe: "5 Rowa Fruit, 1 Beast Carcass, 1 Beast Carcass, 1 Nascent Butterfly\nFound in: Nomadic Warrior's Cookbook [18]",
         description: "<i>Cured strip of meat, dried out after pickling in a dappled medicinal solution. Craftable item. Temporarily boosts immunity, robustness, and focus.</i>",
         effect: "Consuming this meat invigorates the body, granting the user advantage on Constitution and Wisdom saving throws for 1 minute."
+    },
+    {
+        name: "Dappled White Cured Meat",
+        type: "Consumable",
+        rarity: "Rare",
+        craftable: true,
+        recipe: "5 Rowa Fruit, 1 Strip of White Flesh, 1 Beast Carcass, 1 Nascent Butterfly\nFound in: Nomadic Warrior's Cookbook [18]",
+        description: "<i>Cured strip of white flesh, dried out after pickling in a dappled medicinal solution. Craftable item. Temporarily boosts immunity, robustness, and focus. Lasts longer than traditional cured meat, but with reduced effectiveness</i>",
+        effect: "Consuming this meat invigorates the body, For 1 hour after consuming this meat, you can add +1 on Constitution and Wisdom saving throws."
     },
     {
         name: "Dragoncrest Greatshield Talisman",
@@ -679,6 +698,15 @@ const wondrousItems = [
         effect: "After consuming this foot, you gain twice as many runes from slaying enemies for 1 minute."
     },
     {
+        name: "Silver-Pickled Fowl Foot",
+        type: "Consumable",
+        rarity: "Rare",
+        craftable: true,
+        description: "<i>Four-toed foot of a fowl, pickled in a silver medicinal solution. Craftable item. Temporarily boosts item discovery. Since old times, the needy would scrape the meat clean even from a fowl’s claw.</i>",
+        recipe: "3 Rowa Fruit, 1 Four-Toed Fowl Foot, 1 Shimmering Firefly\nFound in: Missionary's Cookbook [3]",
+        effect: "The effects of this item depend on when it is consumed. If consumed during combat, for 1 minute, you harvest twice the standard amount of materials or items from any enemies you defeat. If consumed outside of combat, the effect lasts for 8 hours; during this time, you add 1d4 to the party's highest Wisdom (Survival) modifier when calculating the plus-or-minus range on the Material Gathering chart for the day's travel."
+    },
+    {
         name: "Golden Ammunition",
         type: "Ammunition",
         rarity: "Rare",
@@ -785,6 +813,15 @@ const wondrousItems = [
         effect: "While wearing this talisman, you can use your action to make yourself, including your clothing, armor, weapons, and other belongings on your person, look different until you take a short rest or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between. You can’t change your body type, so you must adopt a form that has the same basic arrangement of limbs. Otherwise, the extent of the illusion is up to you. The changes wrought by this spell fail to hold up to physical inspection. For example, if you use this ability to add a hat to your outfit, objects pass through the hat, and anyone who touches it would feel nothing or would feel your head and hair. If you use this ability to appear thinner than you are, the hand of someone who reaches out to touch you would bump into you while it was seemingly still in midair. To discern that you are disguised, a creature can use its action to inspect your appearance and must succeed on a DC 15 Intelligence (Investigation) check."
     },
     {
+        name: "Immunizing White Cured Meat",
+        type: "Consumable",
+        rarity: "Rare",
+        craftable: true,
+        description: "<i>Cured strip of white flesh, dried out after pickling in a green medicinal solution. Craftable item. Temporarily boosts immunity. Higher immunity helps to mitigate the buildup of various poisons and scarlet rot. Lasts longer than traditional cured meat, but with reduced effectiveness.</i>",
+        recipe: "3 Rowa Fruit, 1 Strip of White Flesh, 1 Great Dragonfly Head, 1 Smoldering Butterfly\nFound in: Armorer's Cookbook [5]",
+        effect: "Consuming this meat invigorates the body, For 1 hour after consuming this meat, you can add +1 to saving throws against poison and scarlet rot."
+    },
+    {
         name: "Immunizing Cured Meat",
         type: "Consumable",
         rarity: "Rare",
@@ -817,6 +854,15 @@ const wondrousItems = [
         description: "<i>Cured strip of meat, dried out after pickling in a red medicinal solution. Craftable item. Temporarily boosts robustness. Higher robustness helps to mitigate the buildup of frost and blood loss.</i>",
         recipe: "3 Rowa Fruit, 1 Beast Carcass, 1 Crab Eggs, 1 Land Octopus Ovary\nFound in: Nomadic Warrior's Cookbook [2]",
         effect: "Consuming this meat invigorates the body, granting the user advantage on saving throws against Bleed and frostbite for 1 minute."
+    },
+    {
+        name: "Invigorating White Cured Meat",
+        type: "Consumable",
+        rarity: "Rare",
+        craftable: true,
+        description: "<i>Cured strip of white flesh, dried out after pickling in a red medicinal solution. Craftable item. Temporarily boosts robustness. Higher robustness helps to mitigate the buildup of frost and blood loss. Lasts longer than traditional cured meat, but with reduced effectiveness.</i>",
+        recipe: "3 Rowa Fruit, 1 Strip of White Flesh, 1 Crab Eggs, 1 Land Octopus Ovary\nFound in: Nomadic Warrior's Cookbook [2]",
+        effect: "Consuming this meat invigorates the body, For 1 hour after consuming this meat, you can add +1 to saving throws against Bleed and Frostbite."
     },
     {
         name: "Ironjar Aromatic",
@@ -1433,6 +1479,15 @@ const wondrousItems = [
         craftable: false,
         description: "Witch's robe in the color of snow. Once worn by the snowy crone who the young Ranni encountered deep in the woods. She was a witch, and well versed in cold sorceries. It is said that the doll that houses Ranni's soul was modeled after her. That old witch was Ranni's secret mentor.",
         effect: "While wearing these robes, creatures have disadvantage on saving throws against being frostbitten by sorceries you cast."
+    },
+    {
+        name: "Stimulating Boluses",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        recipe: "1 Herba, 1 Cave Moss, 1 Slumbering Egg\nFound in: Nomadic Warrior's Cookbook [16]",
+        description: "<i>Light-purple boluses made from cave moss. Craftable item. Alleviates sleep buildup.</i>",
+        effect: "Feeding these boluses to a unconscious creature ends the unconscious condition."
     },
     {
         name: "Spark Aromatic",
@@ -2073,6 +2128,110 @@ const wondrousItems = [
         craftable: false,
         description: "<i>Standard heavy armor. Consists of shaped, interlocking metal plates to cover the entire body.</i>",
         effect: "Base Armor Class (AC): 18. Strength 15 required. Disadvantage on Stealth checks."
+    },
+    {
+        name: "Crystal Dart",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        description: "<i>A throwing dart carved from impure glintstone. Craftable item. Deals magic damage. Long ago, it is said that a golem crafter employed a similar crystal tool.</i>",
+        recipe: "3x Cracked Crystal\nFound in: Nomadic Warrior's Cookbook [11]",
+        effect: "As a bonus action, or in place of one attack when you take the Attack action, you can throw this dart. Make a ranged weapon attack (range 20/60). On a hit, the target takes force damage equal to 1d4 + your Dexterity modifier. If the target is a construct (such as an Erdtree Burial Watchdog or Stone Imp), it must succeed on a DC 13 Wisdom saving throw or become frenzied for 1 minute. While frenzied, it treats all creatures as hostile and must attack the nearest creature to it on its turn."
+    },
+    {
+        name: "Poisonbone Dart",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        description: "<i>An animal bone carved into a dart and coated in toxic venom. Craftable item. Afflicts targets with poison.</i>",
+        recipe: "2x Beast Carcass, 1x Poisonbloom\nFound in: Nomadic Warrior's Cookbook [14]",
+        effect: "As a bonus action, or in place of one attack when you take the Attack action, you can throw this dart. Make a ranged weapon attack (range 20/60). On a hit, the target takes piercing damage equal to 1d4 + your Dexterity modifier, and it must succeed on a DC 13 Constitution saving throw or take 1d4 poison damage and become poisoned for 1 minute. A poisoned creature can repeat the saving throw at the end of each of its turns, ending the effect on a success."
+    },
+    {
+        name: "Dart",
+        type: "Consumable",
+        rarity: "Common",
+        craftable: true,
+        description: "<i>simple throwing dart crafted from animal bones.</i>",
+        recipe: "1x Beast Carcass\nFound in: Starting Kit",
+        effect: "As a bonus action, or in place of one attack when you take the Attack action, you can throw this dart. Make a ranged weapon attack (range 20/60). On a hit, the target takes piercing damage equal to 1d4 + your Dexterity modifier."
+    },
+    {
+        name: "Rainbow Stone",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        description: "<i>Ruin Fragment that has undergone some simple processing. Craftable item. Stones such as these shine with the colors of the rainbow, making them useful markers when placed on the ground. Can also be dropped to gauge the distance of a fall. The higher the pitch of the sound, the higher the likelihood of the fall being fatal. Once used to entertain children on the fringes of the Lands Between.</i>",
+        recipe: "1 Ruin Fragment\nFound in: Starting Recipe",
+        effect: "As an action you may place one of these glowing, colored stones on the ground to serve as a marker for others. The stones give off dim light in a five foot radius. When dropped more than 10 feet, it gives off a high pitched noise. The noise becomes higher pitched the further the fall is. A DC10 Intelligence check allows a creature within earshot to accurately gauge the fall distance to within 5 feet."
+    },
+    {
+        name: "Rowa Raisin",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        description: "<i>Preparation of dried Rowa fruit. Craftable item. Feed to Torrent, the spectral steed, while riding to restore his HP. Humans are unable to digest Rowa fruit, but Torrent seems to have a taste for it.</i>",
+        recipe: "1 Rowa Fruit\nFound in: Starting Recipe",
+        effect: "As an action, you may feed these raisins to Torrent, causing him to regain 4d4 hit points."
+    },
+    {
+        name: "Sweet Raisin",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: true,
+        description: "<i>Preparation of dried Golden Rowa. Craftable item. Feed to Torrent, the spectral steed, while riding to greatly restore his HP. Humans are unable to digest Rowa fruit, but Torrent seems to have a taste for it.</i>",
+        recipe: "1 Rowa Fruit\nFound in: Nomadic Warrior's Cookbook [19]",
+        effect: "As an action, you may feed these raisins to Torrent, causing him to regain 6d6 hit points."
+    },
+    {
+        name: "Frozen Raisin",
+        type: "Consumable",
+        rarity: "Rare",
+        craftable: true,
+        description: "<i>Preparation of dried Rimed Rowa. Craftable item. Feed to Torrent, the spectral steed, while riding to immensely restore his HP. Humans are unable to digest Rowa fruit, but Torrent seems to have a taste for it.</i>",
+        recipe: "1 Rowa Fruit\nFound in: Nomadic Warrior's Cookbook [23]",
+        effect: "As an action, you may feed these raisins to Torrent, causing him to regain 8d8 hit points."
+    },
+    {
+        name: "Spectral Steed Whistle",
+        type: "Tool",
+        rarity: "Unique",
+        craftable: false,
+        description: "<i>A delicate goldwork ring. Can be used as a finger whistle. Sound the whistle to summon and ride Torrent, the spectral steed. (Dismounts steed when used while on horseback.) Upon his death, the spectral steed can be summoned again, but doing so drains the Flask of Crimson Tears.</i>",
+        effect: "This whistle is used to summon a spectral steed named Torrent. As a bonus action, you may blow the whistle, causing Torrent to appear in the nearest unoccupied space. You may choose to summon Torrent underneath you already mounted. By using a bonus action to use the whistle again, you cause Torrent to return to the ether. Torrent regains all of his lost hit points after the whistle's owner finishes a long rest. If Torrent is reduced to 0 hit points, he vanishes immediately. The whistle can be used to summon Torrent afterwards by expending a charge of the flask of crimson tears."
+    },
+    {
+        name: "Spirit Calling Bell",
+        type: "Tool",
+        rarity: "Rare",
+        craftable: false,
+        description: "<i>A bell capable of summoning various spirits from ashen remains. It usually requires SP to use.</i>",
+        effect: "This delicate bell calls the spirits of the dead back to the Lands Between, if only for a moment. As an action, you may ring the bell and call upon a Spirit Ash in your possession. Summoning a spirit costs an amount of SP equal to twice the combined hit dice of the spirits within the ash (minimum 2 SP per spirit). Martial spell points can be used to summon spirits. The spirits appear in the nearest unoccupied spaces to you that they fit within. The summoned spirits are friendly to you and your companions. Roll initiative for the summoned creatures as a group, which has its own turns. They obey any verbal commands that you issue to them (no action required by you). If you don’t issue any commands to them, they defend themselves from hostile creatures, but otherwise take no actions. When you summon a spirit from a Spirit Ash, the ash becomes inert and cannot be used to summon the same spirit again. A Spirit Ash can be rejuvenated with the use of a Spirit Tuner."
+    },
+    {
+        name: "Stonesword Key",
+        type: "Consumable",
+        rarity: "Uncommon",
+        craftable: false,
+        description: "<i>A sword-shaped stone key. Breaks the seal on imp statues, but remains embedded in the statue after use, meaning it can only be used once as an item. Think well before using one.</i>"
+    },
+    {
+        name: "Soft Cotton",
+        type: "Consumable",
+        rarity: "Common",
+        craftable: true,
+        recipe: "3 Rowa Fruit, 1 Smoldering Butterfly\nFound in: Nomadic Warrior's Cookbook [7]",
+        description: "<i>Fluffy cotton, soft to the touch. Craftable item. Attach to one's feet to temporarily reduce fall damage and sound. Nighttime falls quiet as the grave, and hunters of the dark are light upon their feet.</i>",
+        effect: "As an action, you can attach this cotton to your footwear. For 1 minute, you have advantage on Dexterity (Stealth) checks that rely on moving silently, and any bludgeoning damage you take from falling is halved."
+    },
+    {
+        name: "Soap",
+        type: "Consumable",
+        rarity: "Common",
+        craftable: true,
+        recipe: "2 Mushroom\nFound in: Nomadic Warrior's Cookbook [17]",
+        description: "<i>Soap made from mushroom juice. Craftable item. Washes off filth and grime covering the body, slightly alleviating poison buildup. The subterranean dwellers, who have come to loathe their own wretchedness, wash themselves with this. Or at least, they used to.</i>",
+        effect: "As an action, you can use this soap and a splash of water to wash away filth, grime, or hazardous materials covering your body and equipment. Using the soap instantly removes any lingering surface-level effects clinging to your character. Additionally, washing with soap allows you to immediately make a new Constitution saving throw against the poisoned condition or the Rotting condition, provided the affliction was caused by an external environmental factor (such as wading through a toxic swamp) rather than a direct internal affliction."
     }
         
 ];

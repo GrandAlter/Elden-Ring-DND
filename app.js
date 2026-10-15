@@ -9,8 +9,19 @@ const charStats = JSON.parse(localStorage.getItem('erCharStats')) || {
 
 // Inventory State Management
 let userInventory = JSON.parse(localStorage.getItem('erInventory')) || {
-    weapons: [], ashes: [], spells: [], wondrous: [], books: [], materials: [], subclasses: [], backgrounds: []
+    weapons: [], ashes: [], spells: [], wondrous: [], books: [], materials: [], subclasses: [], backgrounds: [], bestiary: []
 };
+
+// Safe Data Loading
+const safeWeapons = typeof weapons !== 'undefined' ? weapons : [];
+const safeAshes = typeof ashesOfWar !== 'undefined' ? ashesOfWar : [];
+const safeSpells = typeof spells !== 'undefined' ? spells : [];
+const safeWondrous = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
+const safeBooks = typeof books !== 'undefined' ? books : [];
+const safeMaterials = typeof materials !== 'undefined' ? materials : [];
+const safeSubclasses = typeof subclasses !== 'undefined' ? subclasses : [];
+const safeBackgrounds = typeof backgrounds !== 'undefined' ? backgrounds : [];
+const safeBestiary = typeof bestiary !== 'undefined' ? bestiary : [];
 
 function getModifier(score) {
     return Math.floor((score - 10) / 2);
@@ -83,6 +94,39 @@ const weaponTypeProperties = {
     "glintstone staff": ["catalyst"],
     "sacred seal": ["catalyst"]
 };
+
+// Ash Compatibility Evaluator
+function isWeaponCompatibleWithAsh(weaponType, compatibilityStr) {
+    if (!compatibilityStr || !weaponType) return false;
+    const compLower = compatibilityStr.toLowerCase();
+    
+    // Explicit exclusions
+    if (compLower.includes("none") || compLower.includes("unique")) return false;
+    
+    // Explicit inclusions
+    if (compLower.includes(weaponType.toLowerCase())) return true;
+
+    // Check underlying properties
+    const props = weaponTypeProperties[weaponType.toLowerCase()];
+    if (!props) return false;
+
+    // Split compatibility string by commas or 'or'
+    const conditions = compLower.replace(/ or /g, ',').split(',').map(s => s.trim());
+    
+    // Check if the ash relies on properties rather than explicit names
+    const isPropertyBased = conditions.some(c => ["melee", "ranged", "shield", "shields only"].includes(c));
+    
+    if (isPropertyBased) {
+        return conditions.every(cond => {
+            if (cond === "shields only" || cond === "shield") return props.includes("shield");
+            if (cond === "melee") return props.includes("melee");
+            if (cond === "ranged") return props.includes("ranged");
+            if (cond.startsWith("non-")) return !props.includes(cond.replace("non-", ""));
+            return props.includes(cond);
+        });
+    }
+    return false;
+}
 
 // Dice Engine & Parser
 function logDiceRoll(title, resultStr, total, isCrit = false) {
@@ -253,55 +297,11 @@ function processWeaponProperties(text) {
     });
 }
 
-// ------------------------------------------------------------
-// CRITICAL FIX: Globally scoped Ash of War Compatibility Checker
-// ------------------------------------------------------------
-function isWeaponCompatibleWithAsh(weaponType, compatibilityStr) {
-    if (!compatibilityStr || !weaponType) return false;
-    const compLower = compatibilityStr.toLowerCase();
-    
-    // Explicit exclusions
-    if (compLower.includes("none") || compLower.includes("unique")) return false;
-    
-    // Explicit inclusions (e.g. "Dagger" matches "Dagger")
-    if (compLower.includes(weaponType.toLowerCase())) return true;
-
-    // Check underlying properties
-    const props = weaponTypeProperties[weaponType.toLowerCase()];
-    if (!props) return false;
-
-    // Split compatibility string by commas or 'or'
-    const conditions = compLower.replace(/ or /g, ',').split(',').map(s => s.trim());
-    
-    // Check if the ash relies on properties (like "Melee" or "Heavy") rather than explicit names
-    const isPropertyBased = conditions.some(c => ["melee", "ranged", "shield", "shields only"].includes(c));
-    
-    if (isPropertyBased) {
-        return conditions.every(cond => {
-            if (cond === "shields only" || cond === "shield") return props.includes("shield");
-            if (cond === "melee") return props.includes("melee");
-            if (cond === "ranged") return props.includes("ranged");
-            if (cond.startsWith("non-")) return !props.includes(cond.replace("non-", ""));
-            return props.includes(cond);
-        });
-    }
-    return false;
-}
-
 function linkifyText(text) {
     if (!text) return "";
     let linkedText = text;
     
     linkedText = processWeaponProperties(linkedText);
-
-    const safeWeapons = typeof weapons !== 'undefined' ? weapons : [];
-    const safeAshes = typeof ashesOfWar !== 'undefined' ? ashesOfWar : [];
-    const safeSpells = typeof spells !== 'undefined' ? spells : [];
-    const safeWondrous = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
-    const safeBooks = typeof books !== 'undefined' ? books : [];
-    const safeMaterials = typeof materials !== 'undefined' ? materials : [];
-    const safeSubclasses = typeof subclasses !== 'undefined' ? subclasses : [];
-    const safeBackgrounds = typeof backgrounds !== 'undefined' ? backgrounds : [];
 
     const linkItems = [];
     
@@ -393,35 +393,35 @@ function linkifyText(text) {
 
 // Global Routing
 window.jumpToWeapon = function(weaponName) {
-    const weapon = typeof weapons !== 'undefined' ? weapons.find(w => w.name === weaponName) : null;
+    const weapon = safeWeapons.find(w => w.name === weaponName);
     if (weapon) { closeModal(); switchTab('weapons'); document.getElementById('searchInput').value = weaponName; filterAndSort(); setTimeout(() => openModal(weapon, 'weapons'), 150); }
 };
 window.jumpToAsh = function(ashName) {
-    const ash = typeof ashesOfWar !== 'undefined' ? ashesOfWar.find(a => a.name === ashName) : null;
+    const ash = safeAshes.find(a => a.name === ashName);
     if (ash) { closeModal(); switchTab('ashes'); document.getElementById('searchInput').value = ashName; filterAndSort(); setTimeout(() => openModal(ash, 'ashes'), 150); }
 };
 window.jumpToSpell = function(spellName) {
-    const spell = typeof spells !== 'undefined' ? spells.find(s => s.name === spellName) : null;
+    const spell = safeSpells.find(s => s.name === spellName);
     if (spell) { closeModal(); switchTab('spells'); document.getElementById('searchInput').value = spellName; filterAndSort(); setTimeout(() => openModal(spell, 'spells'), 150); }
 };
 window.jumpToWondrous = function(itemName) {
-    const item = typeof wondrousItems !== 'undefined' ? wondrousItems.find(w => w.name === itemName) : null;
+    const item = safeWondrous.find(w => w.name === itemName);
     if (item) { closeModal(); switchTab('wondrous'); document.getElementById('searchInput').value = itemName; filterAndSort(); setTimeout(() => openModal(item, 'wondrous'), 150); }
 };
 window.jumpToBook = function(bookName) {
-    const book = typeof books !== 'undefined' ? books.find(b => b.name === bookName) : null;
+    const book = safeBooks.find(b => b.name === bookName);
     if (book) { closeModal(); switchTab('books'); document.getElementById('searchInput').value = bookName; filterAndSort(); setTimeout(() => openModal(book, 'books'), 150); }
 };
 window.jumpToMaterial = function(matName) {
-    const mat = typeof materials !== 'undefined' ? materials.find(m => m.name === matName) : null;
+    const mat = safeMaterials.find(m => m.name === matName);
     if (mat) { closeModal(); switchTab('materials'); document.getElementById('searchInput').value = matName; filterAndSort(); setTimeout(() => openModal(mat, 'materials'), 150); }
 };
 window.jumpToSubclass = function(subName) {
-    const sub = typeof subclasses !== 'undefined' ? subclasses.find(s => s.name === subName) : null;
+    const sub = safeSubclasses.find(s => s.name === subName);
     if (sub) { closeModal(); switchTab('subclasses'); document.getElementById('searchInput').value = subName; filterAndSort(); setTimeout(() => openModal(sub, 'subclasses'), 150); }
 };
 window.jumpToBackground = function(bgName) {
-    const bg = typeof backgrounds !== 'undefined' ? backgrounds.find(b => b.name === bgName) : null;
+    const bg = safeBackgrounds.find(b => b.name === bgName);
     if (bg) { closeModal(); switchTab('backgrounds'); document.getElementById('searchInput').value = bgName; filterAndSort(); setTimeout(() => openModal(bg, 'backgrounds'), 150); }
 };
 
@@ -471,10 +471,8 @@ function isItemMatch(item, tab, f, query) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const gridContainer = document.getElementById('gridContainer');
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
-    
     const filterLetter = document.getElementById('filterLetter');
     const filterType = document.getElementById('filterType');
     const filterRarityUnique = document.getElementById('filterRarityUnique');
@@ -572,16 +570,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const tabElements = ['Inventory', 'Weapons', 'Ashes', 'Spells', 'Wondrous', 'Books', 'Materials', 'Subclasses', 'Backgrounds'];
-    tabElements.forEach(tabName => {
-        const btn = document.getElementById(`tab${tabName}`);
-        if (btn) btn.addEventListener('click', () => switchTab(tabName.toLowerCase()));
-    });
+    // Tabs
+    const tabInventoryBtn = document.getElementById('tabInventory');
+    const tabWeaponsBtn = document.getElementById('tabWeapons');
+    const tabAshesBtn = document.getElementById('tabAshes');
+    const tabSpellsBtn = document.getElementById('tabSpells');
+    const tabWondrousBtn = document.getElementById('tabWondrous');
+    const tabBooksBtn = document.getElementById('tabBooks');
+    const tabMaterialsBtn = document.getElementById('tabMaterials');
+    const tabSubclassesBtn = document.getElementById('tabSubclasses');
+    const tabBackgroundsBtn = document.getElementById('tabBackgrounds');
+    const tabBestiaryBtn = document.getElementById('tabBestiary');
+    const tabEncountersBtn = document.getElementById('tabEncounters');
 
-    [searchInput, sortSelect, filterLetter, filterType, filterRarityUnique, filterAffinity, filterSchool, filterLevel]
+    if (tabInventoryBtn) tabInventoryBtn.addEventListener('click', () => switchTab('inventory'));
+    if (tabWeaponsBtn) tabWeaponsBtn.addEventListener('click', () => switchTab('weapons'));
+    if (tabAshesBtn) tabAshesBtn.addEventListener('click', () => switchTab('ashes'));
+    if (tabSpellsBtn) tabSpellsBtn.addEventListener('click', () => switchTab('spells'));
+    if (tabWondrousBtn) tabWondrousBtn.addEventListener('click', () => switchTab('wondrous'));
+    if (tabBooksBtn) tabBooksBtn.addEventListener('click', () => switchTab('books'));
+    if (tabMaterialsBtn) tabMaterialsBtn.addEventListener('click', () => switchTab('materials'));
+    if (tabSubclassesBtn) tabSubclassesBtn.addEventListener('click', () => switchTab('subclasses'));
+    if (tabBackgroundsBtn) tabBackgroundsBtn.addEventListener('click', () => switchTab('backgrounds'));
+    if (tabBestiaryBtn) tabBestiaryBtn.addEventListener('click', () => switchTab('bestiary'));
+    if (tabEncountersBtn) tabEncountersBtn.addEventListener('click', () => switchTab('encounters'));
+
+    // Admin Access Listener for Bestiary and Encounters
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            if (e.target.value.toLowerCase() === 'admin') {
+                if (tabBestiaryBtn) tabBestiaryBtn.classList.remove('hidden');
+                if (tabEncountersBtn) tabEncountersBtn.classList.remove('hidden');
+                e.target.value = ''; 
+            }
+            filterAndSort();
+        });
+    }
+
+    [sortSelect, filterLetter, filterType, filterRarityUnique, filterAffinity, filterSchool, filterLevel]
         .forEach(el => {
             if (el) {
-                el.addEventListener('input', filterAndSort);
                 el.addEventListener('change', filterAndSort);
             }
         });
@@ -606,6 +634,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- ENCOUNTER MAKER LOGIC ---
+    const encounterData = {
+        limgrave: ["1d4 Godrick Soldiers", "1 Runebear", "2d6 Wandering Nobles", "1 Tree Sentinel", "1d4 Giant Bats"],
+        stormhill: ["1d4 Giant Bats", "1 Troll", "2d4 Godrick Soldiers + 1 Godrick Knight", "1d4 Warhawks"],
+        mistwood: ["1d4 Demi-Humans", "1 Lesser Runebear", "1d4 Giant Rats", "1 Bloodhound Knight"],
+        weeping_peninsula: ["2d4 Misbegotten", "1d4 Skeletons", "1 Night's Cavalry (Night only)", "1 Erdtree Avatar"],
+        siofra_river: ["1d4 Ancestral Followers", "2d6 Claymen", "1 Ancestral Follower Shaman", "1d4 Giant Crabs"]
+    };
+
+    const invaderData = ["Bloody Finger Nerijus", "Recusant Henricus", "Anastasia, Tarnished-Eater", "Mad Tongue Alberich", "Festering Fingerprint Vyke"];
+
+    const rollEncounterBtn = document.getElementById('rollEncounterBtn');
+    const encounterZoneSelect = document.getElementById('encounterZoneSelect');
+
+    // Safely load from data_encounters.js
+    const safeEncounterData = typeof encounterData !== 'undefined' ? encounterData : {};
+    const safeInvaderData = typeof invaderData !== 'undefined' ? invaderData : [];
+
+    if (rollEncounterBtn && encounterZoneSelect) {
+        rollEncounterBtn.addEventListener('click', () => {
+            const zone = encounterZoneSelect.value;
+            const resultDiv = document.getElementById('encounterResult');
+            
+            if (!zone || !safeEncounterData[zone]) {
+                resultDiv.innerHTML = '<span class="text-red-400">Please select a valid zone first.</span>';
+                return;
+            }
+
+            const table = safeEncounterData[zone];
+            const roll = Math.floor(Math.random() * table.length);
+            let resultHtml = `<div class="text-2xl font-serif text-white mb-2">${table[roll]}</div>`;
+
+            // 5% Invader Chance
+            if (safeInvaderData.length > 0 && Math.random() < 0.05) {
+                const invaderRoll = Math.floor(Math.random() * safeInvaderData.length);
+                resultHtml += `
+                    <div class="mt-4 p-3 bg-red-900/30 border border-red-500/50 rounded-lg animate-pulse w-full max-w-md mx-auto">
+                        <span class="text-red-500 font-bold uppercase tracking-widest text-sm block mb-1">⚠️ Invaded by Dark Spirit!</span>
+                        <span class="text-red-400 font-serif text-lg">${safeInvaderData[invaderRoll]}</span>
+                    </div>
+                `;
+            }
+
+            resultDiv.innerHTML = resultHtml;
+            logDiceRoll('Encounter Roll', `Zone: ${zone}`, table[roll], false);
+        });
+
+        encounterZoneSelect.addEventListener('change', (e) => {
+            const zone = e.target.value;
+            const displayDiv = document.getElementById('encounterTableDisplay');
+            if (!zone || !safeEncounterData[zone]) return;
+
+            const table = safeEncounterData[zone];
+            let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+            table.forEach((enc, index) => {
+                html += `<div class="bg-er-dark border border-stone-800 p-3 rounded flex gap-3 items-center">
+                    <span class="text-stone-600 font-mono font-bold">${(index + 1).toString().padStart(2, '0')}</span>
+                    <span class="text-stone-300">${enc}</span>
+                </div>`;
+            });
+            html += '</div>';
+            displayDiv.innerHTML = html;
+        });
+    }
+
     const modal = document.getElementById('itemModal');
     const modalBackdrop = document.getElementById('modalBackdrop');
     const closeModalBtn = document.getElementById('closeModalBtn');
@@ -622,30 +715,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeModal();
     });
 
-    // Start App
     switchTab('weapons');
 });
 
 function switchTab(tab) {
     currentTab = tab;
     
-    const tabs = ['inventory', 'weapons', 'ashes', 'spells', 'wondrous', 'books', 'materials', 'subclasses', 'backgrounds'];
+    const tabs = ['inventory', 'weapons', 'ashes', 'spells', 'wondrous', 'books', 'materials', 'subclasses', 'backgrounds', 'bestiary', 'encounters'];
     tabs.forEach(t => {
         const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
         if (btn) {
-            let baseColor = '';
-            if (t === 'subclasses' || t === 'backgrounds') baseColor = 'text-[#a478b8]';
-            
+            // Safely toggle the active state classes without erasing the 'hidden' class
             if (t === tab) {
-                btn.className = `pb-1 tab-active shrink-0 font-bold ${baseColor || 'text-er-gold'}`;
+                btn.classList.remove('tab-inactive');
+                btn.classList.add('tab-active', 'font-bold');
+                // Add gold text only to standard tabs
+                if (!['subclasses', 'backgrounds', 'bestiary', 'encounters'].includes(t)) {
+                    btn.classList.add('text-er-gold');
+                }
             } else {
-                btn.className = `pb-1 tab-inactive shrink-0 ${baseColor}`;
+                btn.classList.remove('tab-active', 'font-bold', 'text-er-gold');
+                btn.classList.add('tab-inactive');
             }
         }
     });
+
+    const gridContainer = document.getElementById('gridContainer');
+    const encounterContainer = document.getElementById('encounterContainer');
+    const noResults = document.getElementById('noResults');
+    const itemCount = document.getElementById('itemCount');
+
+    if (tab === 'encounters') {
+        if(gridContainer) gridContainer.classList.add('hidden');
+        if(noResults) noResults.classList.add('hidden');
+        if(encounterContainer) encounterContainer.classList.remove('hidden');
+        if(itemCount) itemCount.innerHTML = `Showing <span class="text-er-gold font-bold text-sm">Encounter Maker</span>`;
+    } else {
+        if(encounterContainer) encounterContainer.classList.add('hidden');
+        if(gridContainer) gridContainer.classList.remove('hidden');
+    }
     
     buildControls();
-    filterAndSort();
+    if (tab !== 'encounters') filterAndSort();
 }
 
 function buildControls() {
@@ -657,6 +768,19 @@ function buildControls() {
     const filterLevel = document.getElementById('filterLevel');
 
     if (!sortSelect || !filterType || !filterRarityUnique || !filterAffinity) return;
+
+    if (currentTab === 'encounters') {
+        filterType.classList.add('hidden');
+        filterRarityUnique.classList.add('hidden');
+        filterAffinity.classList.add('hidden');
+        if (filterSchool) filterSchool.classList.add('hidden');
+        if (filterLevel) filterLevel.classList.add('hidden');
+        sortSelect.innerHTML = `<option value="none">N/A</option>`;
+        sortSelect.disabled = true;
+        return;
+    }
+
+    sortSelect.disabled = false;
 
     let sortHTML = `
         <option value="alpha_asc">Alphabetical (A-Z)</option>
@@ -685,11 +809,9 @@ function buildControls() {
         if (filterLevel) filterLevel.classList.add('hidden');
         
         filterType.innerHTML = '<option value="all">Any Category</option>';
-        if (typeof weapons !== 'undefined') {
-            [...new Set(weapons.map(w => w.type))].sort().forEach(t => {
-                filterType.innerHTML += `<option value="${t.toLowerCase()}">${t}</option>`;
-            });
-        }
+        [...new Set(safeWeapons.map(w => w.type))].sort().forEach(t => {
+            filterType.innerHTML += `<option value="${t.toLowerCase()}">${t}</option>`;
+        });
         
         filterRarityUnique.innerHTML = `
             <option value="all">Any Rarity / Uniqueness</option>
@@ -721,22 +843,20 @@ function buildControls() {
         if (filterLevel) filterLevel.classList.add('hidden');
         
         filterType.innerHTML = '<option value="all">Any Compatibility</option>';
-        if (typeof ashesOfWar !== 'undefined') {
-            const allTypes = new Set();
-            ashesOfWar.forEach(ash => {
-                if (!ash.compatibility.toLowerCase().includes('unique') && ash.compatibility !== 'None') {
-                    const conditions = ash.compatibility.replace(/ or /g, ',').split(',').map(s => s.trim());
-                    conditions.forEach(cond => {
-                        if (!["melee", "ranged", "shield", "shields only"].includes(cond.toLowerCase()) && !cond.toLowerCase().startsWith("non-")) {
-                            allTypes.add(cond);
-                        }
-                    });
-                }
-            });
-            [...allTypes].sort().forEach(t => {
-                filterType.innerHTML += `<option value="${t.toLowerCase()}">${t}</option>`;
-            });
-        }
+        const allTypes = new Set();
+        safeAshes.forEach(ash => {
+            if (!ash.compatibility.toLowerCase().includes('unique') && ash.compatibility !== 'None') {
+                const conditions = ash.compatibility.replace(/ or /g, ',').split(',').map(s => s.trim());
+                conditions.forEach(cond => {
+                    if (!["melee", "ranged", "shield", "shields only"].includes(cond.toLowerCase()) && !cond.toLowerCase().startsWith("non-")) {
+                        allTypes.add(cond);
+                    }
+                });
+            }
+        });
+        [...allTypes].sort().forEach(t => {
+            filterType.innerHTML += `<option value="${t.toLowerCase()}">${t}</option>`;
+        });
         
         filterRarityUnique.innerHTML = `
             <option value="all">Any Uniqueness</option>
@@ -766,25 +886,21 @@ function buildControls() {
         
         if (filterSchool) {
             filterSchool.innerHTML = '<option value="all">Any School of Magic</option>';
-            if (typeof spells !== 'undefined') {
-                [...new Set(spells.map(s => s.school))].sort().forEach(s => {
-                    filterSchool.innerHTML += `<option value="${s.toLowerCase()}">${s}</option>`;
-                });
-            }
+            [...new Set(safeSpells.map(s => s.school))].sort().forEach(s => {
+                filterSchool.innerHTML += `<option value="${s.toLowerCase()}">${s}</option>`;
+            });
         }
         if (filterLevel) {
             filterLevel.innerHTML = '<option value="all">Any Spell Level</option>';
-            if (typeof spells !== 'undefined') {
-                let levels = [...new Set(spells.map(s => s.level))].sort((a,b) => {
-                    if (a === 'Cantrip') return -1;
-                    if (b === 'Cantrip') return 1;
-                    return parseInt(a) - parseInt(b);
-                });
-                levels.forEach(l => {
-                    const disp = l === 'Cantrip' ? 'Cantrip' : `Level ${l}`;
-                    filterLevel.innerHTML += `<option value="${l.toString().toLowerCase()}">${disp}</option>`;
-                });
-            }
+            let levels = [...new Set(safeSpells.map(s => s.level))].sort((a,b) => {
+                if (a === 'Cantrip') return -1;
+                if (b === 'Cantrip') return 1;
+                return parseInt(a) - parseInt(b);
+            });
+            levels.forEach(l => {
+                const disp = l === 'Cantrip' ? 'Cantrip' : `Level ${l}`;
+                filterLevel.innerHTML += `<option value="${l.toString().toLowerCase()}">${disp}</option>`;
+            });
         }
     } else if (currentTab === 'wondrous') {
         sortHTML += `
@@ -800,11 +916,9 @@ function buildControls() {
         if (filterLevel) filterLevel.classList.add('hidden');
         
         filterType.innerHTML = '<option value="all">Any Item Type</option>';
-        if (typeof wondrousItems !== 'undefined') {
-            [...new Set(wondrousItems.map(w => w.type))].sort().forEach(t => {
-                filterType.innerHTML += `<option value="${t.toLowerCase()}">${t}</option>`;
-            });
-        }
+        [...new Set(safeWondrous.map(w => w.type))].sort().forEach(t => {
+            filterType.innerHTML += `<option value="${t.toLowerCase()}">${t}</option>`;
+        });
         
         filterRarityUnique.innerHTML = `
             <option value="all">Any Rarity</option>
@@ -864,11 +978,9 @@ function buildControls() {
         if (filterLevel) filterLevel.classList.add('hidden');
         
         filterType.innerHTML = '<option value="all">Any Class</option>';
-        if (typeof subclasses !== 'undefined') {
-            [...new Set(subclasses.map(s => s.className))].sort().forEach(c => {
-                filterType.innerHTML += `<option value="${c.toLowerCase()}">${c}</option>`;
-            });
-        }
+        [...new Set(safeSubclasses.map(s => s.className))].sort().forEach(c => {
+            filterType.innerHTML += `<option value="${c.toLowerCase()}">${c}</option>`;
+        });
     } else if (currentTab === 'backgrounds') {
         sortHTML += `
             <option value="alpha_asc">Alphabetical (A-Z)</option>
@@ -878,6 +990,28 @@ function buildControls() {
         filterAffinity.classList.add('hidden');
         if (filterSchool) filterSchool.classList.add('hidden');
         if (filterLevel) filterLevel.classList.add('hidden');
+    } else if (currentTab === 'bestiary') {
+        sortHTML += `
+            <option value="cr_desc">Challenge Rating (High to Low)</option>
+            <option value="cr_asc">Challenge Rating (Low to High)</option>
+            <option value="type_asc">Creature Type (A-Z)</option>
+        `;
+        
+        filterType.classList.remove('hidden');
+        filterRarityUnique.classList.remove('hidden');
+        filterAffinity.classList.add('hidden');
+        if (filterSchool) filterSchool.classList.add('hidden');
+        if (filterLevel) filterLevel.classList.add('hidden');
+        
+        filterType.innerHTML = '<option value="all">Any Type</option>';
+        [...new Set(safeBestiary.map(b => b.type))].sort().forEach(t => {
+            filterType.innerHTML += `<option value="${(t||'').toLowerCase()}">${t}</option>`;
+        });
+        
+        filterRarityUnique.innerHTML = '<option value="all">Any CR</option>';
+        [...new Set(safeBestiary.map(b => b.cr))].sort((a,b) => parseFloat(a) - parseFloat(b)).forEach(cr => {
+            filterRarityUnique.innerHTML += `<option value="${(cr||'').toString().toLowerCase()}">${cr}</option>`;
+        });
     }
     
     const oldVal = sortSelect.value;
@@ -894,12 +1028,11 @@ function buildControls() {
 function filterAndSort() {
     const gridContainer = document.getElementById('gridContainer');
     const searchInput = document.getElementById('searchInput');
-    if (!gridContainer || !searchInput) return;
+    if (!gridContainer || !searchInput || currentTab === 'encounters') return;
 
     const query = searchInput.value.toLowerCase();
     const sortVal = document.getElementById('sortSelect').value;
     
-    // Read Current Filter States
     const activeFilters = {
         letter: document.getElementById('filterLetter').value,
         type: document.getElementById('filterType') ? document.getElementById('filterType').value : 'all',
@@ -909,18 +1042,18 @@ function filterAndSort() {
         level: document.getElementById('filterLevel') ? document.getElementById('filterLevel').value : 'all'
     };
     
-    // Dataset Determination
     let dataset = [];
     if (currentTab === 'inventory') {
         const allGroups = [
-            { cat: 'weapons', data: typeof weapons !== 'undefined' ? weapons : [] },
-            { cat: 'ashes', data: typeof ashesOfWar !== 'undefined' ? ashesOfWar : [] },
-            { cat: 'spells', data: typeof spells !== 'undefined' ? spells : [] },
-            { cat: 'wondrous', data: typeof wondrousItems !== 'undefined' ? wondrousItems : [] },
-            { cat: 'books', data: typeof books !== 'undefined' ? books : [] },
-            { cat: 'materials', data: typeof materials !== 'undefined' ? materials : [] },
-            { cat: 'subclasses', data: typeof subclasses !== 'undefined' ? subclasses : [] },
-            { cat: 'backgrounds', data: typeof backgrounds !== 'undefined' ? backgrounds : [] }
+            { cat: 'weapons', data: safeWeapons },
+            { cat: 'ashes', data: safeAshes },
+            { cat: 'spells', data: safeSpells },
+            { cat: 'wondrous', data: safeWondrous },
+            { cat: 'books', data: safeBooks },
+            { cat: 'materials', data: safeMaterials },
+            { cat: 'subclasses', data: safeSubclasses },
+            { cat: 'backgrounds', data: safeBackgrounds },
+            { cat: 'bestiary', data: safeBestiary }
         ];
 
         allGroups.forEach(group => {
@@ -933,20 +1066,19 @@ function filterAndSort() {
             });
         });
     } else {
-        if (currentTab === 'weapons') dataset = typeof weapons !== 'undefined' ? weapons : [];
-        else if (currentTab === 'ashes') dataset = typeof ashesOfWar !== 'undefined' ? ashesOfWar : [];
-        else if (currentTab === 'spells') dataset = typeof spells !== 'undefined' ? spells : [];
-        else if (currentTab === 'wondrous') dataset = typeof wondrousItems !== 'undefined' ? wondrousItems : [];
-        else if (currentTab === 'books') dataset = typeof books !== 'undefined' ? books : [];
-        else if (currentTab === 'materials') dataset = typeof materials !== 'undefined' ? materials : [];
-        else if (currentTab === 'subclasses') dataset = typeof subclasses !== 'undefined' ? subclasses : [];
-        else if (currentTab === 'backgrounds') dataset = typeof backgrounds !== 'undefined' ? backgrounds : [];
+        if (currentTab === 'weapons') dataset = safeWeapons;
+        else if (currentTab === 'ashes') dataset = safeAshes;
+        else if (currentTab === 'spells') dataset = safeSpells;
+        else if (currentTab === 'wondrous') dataset = safeWondrous;
+        else if (currentTab === 'books') dataset = safeBooks;
+        else if (currentTab === 'materials') dataset = safeMaterials;
+        else if (currentTab === 'subclasses') dataset = safeSubclasses;
+        else if (currentTab === 'backgrounds') dataset = safeBackgrounds;
+        else if (currentTab === 'bestiary') dataset = safeBestiary;
     }
 
-    // 1. Filter Dataset
     let filtered = dataset.filter(item => isItemMatch(item, currentTab === 'inventory' ? item._category : currentTab, activeFilters, query));
 
-    // 2. Cascade Dropdowns (Hide/Disable invalid options)
     if (currentTab !== 'inventory' && currentTab !== 'backgrounds') {
         const updateDropdown = (id, key, extractor) => {
             const sel = document.getElementById(id);
@@ -996,6 +1128,7 @@ function filterAndSort() {
         updateDropdown('filterRarityUnique', 'rarity', i => {
             if (currentTab === 'weapons') return [i.rarity, !['common', 'uncommon'].includes((i.rarity||'').toLowerCase()) ? 'unique' : 'ashable'];
             if (currentTab === 'ashes') return (i.compatibility||'').toLowerCase().includes('unique') ? 'unique' : 'non-unique';
+            if (currentTab === 'bestiary') return i.cr ? i.cr.toString() : '';
             return i.rarity;
         });
 
@@ -1004,14 +1137,15 @@ function filterAndSort() {
         updateDropdown('filterLevel', 'level', i => i.level ? i.level.toString() : '');
     }
 
-    // 3. Sorting
     filtered.sort((a, b) => {
         if (sortVal === 'alpha_asc') return a.name.localeCompare(b.name);
         if (sortVal === 'alpha_desc') return b.name.localeCompare(a.name);
+        if (sortVal === 'cr_asc') return parseFloat(a.cr || 0) - parseFloat(b.cr || 0);
+        if (sortVal === 'cr_desc') return parseFloat(b.cr || 0) - parseFloat(a.cr || 0);
+        if (sortVal === 'type_asc') return (a.type || a.className || '').localeCompare(b.type || b.className || '') || a.name.localeCompare(b.name);
+        if (sortVal === 'type_desc') return (b.type || b.className || '').localeCompare(a.type || a.className || '') || a.name.localeCompare(b.name);
         if (sortVal === 'rarity_desc') return (rarityWeights[(b.rarity || '').toLowerCase()] || 0) - (rarityWeights[(a.rarity || '').toLowerCase()] || 0);
         if (sortVal === 'rarity_asc') return (rarityWeights[(a.rarity || '').toLowerCase()] || 0) - (rarityWeights[(b.rarity || '').toLowerCase()] || 0);
-        if (sortVal === 'type_asc') return (a.type || a.className || '').localeCompare(b.type || b.className || '');
-        if (sortVal === 'type_desc') return (b.type || b.className || '').localeCompare(a.type || a.className || '');
         if (sortVal === 'affinity_asc') return (a.affinity || '').localeCompare(b.affinity || '');
         if (sortVal === 'cost_desc') return (b.sp || 0) - (a.sp || 0);
         if (sortVal === 'cost_asc') return (a.sp || 0) - (b.sp || 0);
@@ -1025,7 +1159,6 @@ function filterAndSort() {
         return 0;
     });
 
-    // 4. Update UI
     const itemCount = document.getElementById('itemCount');
     if (itemCount) {
         const typeNames = {
@@ -1037,7 +1170,8 @@ function filterAndSort() {
             'materials': 'Materials',
             'inventory': 'Inventory Items',
             'subclasses': 'Subclasses',
-            'backgrounds': 'Backgrounds'
+            'backgrounds': 'Backgrounds',
+            'bestiary': 'Creatures'
         };
         itemCount.innerHTML = `Showing <span class="text-er-gold font-bold text-sm">${filtered.length}</span> ${typeNames[currentTab] || 'Items'}`;
     }
@@ -1079,8 +1213,8 @@ function renderItems(items) {
             `;
             
             let matchedSkill = item.skill;
-            if (matchedSkill && typeof ashesOfWar !== 'undefined') {
-                const foundAsh = ashesOfWar.find(a => a.name === matchedSkill.name);
+            if (matchedSkill && safeAshes) {
+                const foundAsh = safeAshes.find(a => a.name === matchedSkill.name);
                 if (foundAsh) {
                     matchedSkill = { ...matchedSkill, desc: foundAsh.description, sp: foundAsh.sp };
                 }
@@ -1181,6 +1315,17 @@ function renderItems(items) {
                     ${item.description}
                 </div>
             `;
+        } else if (itemCat === 'bestiary') {
+            titleColor = 'text-red-500';
+            topTags = `
+                <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">CR ${item.cr || '?'}</span>
+                <span class="text-xs text-stone-500 font-semibold uppercase tracking-wider">${item.type || 'Creature'}</span>
+            `;
+            bottomInfo = `
+                <div class="mt-auto pt-4 border-t border-stone-800 text-xs text-stone-400 italic line-clamp-2">
+                    ${item.description || 'A creature of the Lands Between.'}
+                </div>
+            `;
         }
 
         const inventoryIndicator = currentTab === 'inventory' ? `<div class="absolute top-0 right-0 bg-er-gold text-er-dark text-[9px] font-bold px-2 py-1 uppercase rounded-bl-lg tracking-wider">${itemCat.replace('wondrous', 'relic')}</div>` : '';
@@ -1273,7 +1418,7 @@ function openModal(item, category = currentTab) {
 
     if (safeCategory === 'weapons') {
         titleEl.classList.add('text-er-gold');
-        titleEl.classList.remove('text-[#a478b8]', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400');
+        titleEl.classList.remove('text-[#a478b8]', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-red-500');
         
         const atkBonus = getMeleeAtkBonus(item.affinity);
         dynamicStatsEl.innerHTML = `
@@ -1311,8 +1456,8 @@ function openModal(item, category = currentTab) {
         }
         
         let matchedSkill = item.skill;
-        if (matchedSkill && typeof ashesOfWar !== 'undefined') {
-            const foundAsh = ashesOfWar.find(a => a.name === matchedSkill.name);
+        if (matchedSkill && safeAshes) {
+            const foundAsh = safeAshes.find(a => a.name === matchedSkill.name);
             if (foundAsh) {
                 matchedSkill = { ...matchedSkill, desc: foundAsh.description, sp: foundAsh.sp };
             }
@@ -1328,7 +1473,7 @@ function openModal(item, category = currentTab) {
         
     } else if (safeCategory === 'ashes') {
         titleEl.classList.add('text-er-gold');
-        titleEl.classList.remove('text-[#a478b8]', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400');
+        titleEl.classList.remove('text-[#a478b8]', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-red-500');
         
         const typeEl = document.getElementById('modalType');
         typeEl.textContent = "Ash of War";
@@ -1343,8 +1488,8 @@ function openModal(item, category = currentTab) {
         document.getElementById('modalPassiveTitle').textContent = "Compatibility";
         const passiveEl = document.getElementById('modalPassive');
         
-        if (item.compatibility.toLowerCase().includes('unique') && typeof weapons !== 'undefined') {
-            const matchedWeapon = weapons.find(w => w.skill && w.skill.name === item.name);
+        if (item.compatibility.toLowerCase().includes('unique') && safeWeapons) {
+            const matchedWeapon = safeWeapons.find(w => w.skill && w.skill.name === item.name);
             if (matchedWeapon) {
                 const safeWeaponName = matchedWeapon.name.replace(/'/g, "\\'");
                 passiveEl.innerHTML = `Unique Skill (<span onclick="jumpToWeapon('${safeWeaponName}')" class="text-er-gold hover:text-white underline decoration-er-gold/50 hover:decoration-white underline-offset-4 transition-colors cursor-pointer" title="View Weapon Details">${matchedWeapon.name}</span>)`;
@@ -1363,7 +1508,7 @@ function openModal(item, category = currentTab) {
         
     } else if (safeCategory === 'spells') {
         const isSorcery = item.type.toLowerCase() === 'sorcery';
-        titleEl.classList.remove('text-[#a478b8]', 'text-er-gold', 'text-orange-400', 'text-purple-400', 'text-green-400');
+        titleEl.classList.remove('text-[#a478b8]', 'text-er-gold', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-red-500');
         titleEl.classList.add(isSorcery ? 'text-magic-sorcery' : 'text-magic-incantation');
         
         dynamicStatsEl.innerHTML = `
@@ -1403,7 +1548,7 @@ function openModal(item, category = currentTab) {
         document.getElementById('modalSpellDescription').classList.remove('hidden');
         
     } else if (safeCategory === 'wondrous' || safeCategory === 'books' || safeCategory === 'materials') {
-        titleEl.classList.remove('text-[#a478b8]', 'text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400');
+        titleEl.classList.remove('text-[#a478b8]', 'text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-red-500');
         titleEl.classList.add(safeCategory === 'wondrous' ? 'text-er-gold' : item.type === 'Cookbook' ? 'text-orange-400' : safeCategory === 'materials' ? 'text-green-400' : 'text-purple-400');
         
         const typeEl = document.getElementById('modalType');
@@ -1421,12 +1566,7 @@ function openModal(item, category = currentTab) {
         let descHtml = parseDiceNotation(linkifyText(item.description));
         
         if (item.recipe) {
-            descHtml += `
-                <div class="mt-4 pt-4 border-t border-er-border">
-                    <h4 class="text-er-gold font-serif font-semibold mb-2">Crafting Recipe</h4>
-                    <p class="text-stone-300 text-sm leading-relaxed whitespace-pre-wrap">${parseDiceNotation(linkifyText(item.recipe))}</p>
-                </div>
-            `;
+            descHtml += `<div class="mt-4 pt-4 border-t border-er-border"><h4 class="text-er-gold font-serif font-semibold mb-2">Crafting Recipe</h4><p class="text-stone-300 text-sm leading-relaxed whitespace-pre-wrap">${parseDiceNotation(linkifyText(item.recipe))}</p></div>`;
         }
         
         descEl.innerHTML = descHtml;
@@ -1438,7 +1578,7 @@ function openModal(item, category = currentTab) {
             document.getElementById('modalPassiveContainer').classList.remove('hidden');
         }
     } else if (safeCategory === 'subclasses') {
-        titleEl.classList.remove('text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400');
+        titleEl.classList.remove('text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-red-500');
         titleEl.classList.add('text-[#a478b8]');
         
         const typeEl = document.getElementById('modalType');
@@ -1472,7 +1612,7 @@ function openModal(item, category = currentTab) {
             featuresContainer.classList.remove('hidden');
         }
     } else if (safeCategory === 'backgrounds') {
-        titleEl.classList.remove('text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400');
+        titleEl.classList.remove('text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-red-500');
         titleEl.classList.add('text-[#a478b8]');
         
         const typeEl = document.getElementById('modalType');
@@ -1520,6 +1660,55 @@ function openModal(item, category = currentTab) {
                 sanityHtml += `</div>`;
             }
             sanityContent.innerHTML = sanityHtml;
+        }
+    } else if (safeCategory === 'bestiary') {
+        titleEl.classList.remove('text-er-gold', 'text-magic-sorcery', 'text-magic-incantation', 'text-orange-400', 'text-purple-400', 'text-green-400', 'text-[#a478b8]');
+        titleEl.classList.add('text-red-500');
+
+        const typeEl = document.getElementById('modalType');
+        typeEl.textContent = item.type || 'Creature';
+        typeEl.className = 'bg-er-panel px-2 py-0.5 sm:px-3 sm:py-1 rounded text-stone-300 border border-stone-700';
+        typeEl.classList.remove('hidden');
+
+        const rarEl = document.getElementById('modalRarity');
+        rarEl.textContent = `CR ${item.cr || '?'}`;
+        rarEl.className = 'bg-er-panel px-2 py-0.5 sm:px-3 sm:py-1 rounded text-stone-300 border border-stone-700';
+        rarEl.classList.remove('hidden');
+
+        dynamicStatsEl.innerHTML = `
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center bg-er-panel border border-stone-700 rounded p-2 text-stone-300 mb-4">
+                <div><div class="text-[10px] text-stone-500 uppercase font-bold tracking-widest">STR</div><div class="font-mono text-sm">${item.str || 10}</div></div>
+                <div><div class="text-[10px] text-stone-500 uppercase font-bold tracking-widest">DEX</div><div class="font-mono text-sm">${item.dex || 10}</div></div>
+                <div><div class="text-[10px] text-stone-500 uppercase font-bold tracking-widest">CON</div><div class="font-mono text-sm">${item.con || 10}</div></div>
+                <div><div class="text-[10px] text-stone-500 uppercase font-bold tracking-widest">INT</div><div class="font-mono text-sm">${item.int || 10}</div></div>
+                <div><div class="text-[10px] text-stone-500 uppercase font-bold tracking-widest">WIS</div><div class="font-mono text-sm">${item.wis || 10}</div></div>
+                <div><div class="text-[10px] text-stone-500 uppercase font-bold tracking-widest">CHA</div><div class="font-mono text-sm">${item.cha || 10}</div></div>
+            </div>
+            <div class="flex flex-wrap gap-4 text-sm mb-4">
+                <div class="bg-er-panel border border-stone-700 px-3 py-1 rounded"><strong class="text-stone-500 uppercase tracking-widest text-[10px]">Armor Class:</strong> <span class="font-mono">${item.ac || 10}</span></div>
+                <div class="bg-er-panel border border-stone-700 px-3 py-1 rounded"><strong class="text-stone-500 uppercase tracking-widest text-[10px]">Hit Points:</strong> <span class="font-mono">${item.hp || 10}</span></div>
+                <div class="bg-er-panel border border-stone-700 px-3 py-1 rounded"><strong class="text-stone-500 uppercase tracking-widest text-[10px]">Speed:</strong> <span class="font-mono">${item.speed || '30 ft.'}</span></div>
+            </div>
+        `;
+
+        const descEl = document.getElementById('modalDescription');
+        if (item.description) {
+            descEl.innerHTML = parseDiceNotation(linkifyText(item.description));
+            descEl.classList.remove('hidden');
+        }
+
+        if (item.traits && Array.isArray(item.traits)) {
+            let featuresHtml = '<h4 class="text-red-500 font-serif font-bold text-lg mb-3 border-b border-stone-800 pb-1">Traits & Actions</h4>';
+            item.traits.forEach(feat => {
+                featuresHtml += `
+                    <div class="mb-4 bg-[#14120e] border border-er-border p-3 rounded">
+                        <strong class="text-er-gold block mb-1">${feat.name}</strong>
+                        <span class="text-stone-300 text-sm leading-relaxed whitespace-pre-wrap">${parseDiceNotation(linkifyText(feat.description))}</span>
+                    </div>
+                `;
+            });
+            featuresContainer.innerHTML = featuresHtml;
+            featuresContainer.classList.remove('hidden');
         }
     }
 

@@ -60,10 +60,28 @@ const materials = [
         description: "This empty pot somehow mends itself when broken."
     },
     {
+        name: "Crystal Bud",
+        type: "Material",
+        rarity: "Uncommon",
+        description: "A young plant, crystalized before it could mature. Material used for crafting items.."
+    },
+    {
         name: "Erdleaf Flower",
         type: "Material",
         rarity: "Common",
         description: "A dusky-yellow flower that has started to fade and wilt. Material used for crafting items."
+    },
+    {
+        name: "Eye of Yelough",
+        type: "Material",
+        rarity: "Uncommon",
+        description: "A shrub fruit bursting with ripened pulp. Material used for crafting items. Grown in lands afflicted by frenzy, it's used for its pain-relieving properties... Though it's also known to be a dangerous intoxicant."
+    },
+    {
+        name: "Faded Erdleaf Flower",
+        type: "Material",
+        rarity: "Uncommon",
+        description: "An Erdleaf flower that has faded into a plate scarlet, found blooming in rotten lands. Material used for crafting items."
     },
     {
         name: "Fire Blossom",
@@ -108,6 +126,12 @@ const materials = [
         description: "A purple flower than blooms in graveyards. Material used for crafting items."
     },
     {
+        name: "Gravel Stone",
+        type: "Material",
+        rarity: "Rare",
+        description: "A small clump of sharp, pointed stones. Material used for crafting items. Such compound stones, found in lands once beset by ancient dragons, are said to be the scales of those very beasts."
+    },
+    {
         name: "Great Dragonfly Head",
         type: "Material",
         rarity: "Rare",
@@ -138,6 +162,12 @@ const materials = [
         description: "A delicate water lily of unalloyed gold that has started to fade and wilt. Material used for crafting items. Exceedingly rare to find."
     },
     {
+        name: "Mushroom",
+        type: "Material",
+        rarity: "Common",
+        description: "A fungal growth that thrives in damp thickets and elsewhere. Material used for crafting items.Its thick, spongy flesh makes it a key component in throwing pots."
+    },
+    {
         name: "Miranda Powder",
         type: "Material",
         rarity: "Uncommon",
@@ -150,6 +180,12 @@ const materials = [
         description: "An arcane butterfly with translucent wings. Material used for crafting items. Exceedingly rare to find."
     },
     {
+        name: "Old Fang",
+        type: "Material",
+        rarity: "Rare",
+        description: "A rarely-seen specimen of beast fang. Material used for crafting items. Found by hunting carnivorous beasts. These multiple, overlapping fangs grow from a single root. Perhaps they're a vestige of the primordial crucible."
+    },
+    {
         name: "Perfume Bottle",
         type: "Material",
         rarity: "Very Rare",
@@ -160,6 +196,12 @@ const materials = [
         type: "Material",
         rarity: "Uncommon",
         description: "Flower that grows in toxic terrain. Material used for crafting items. Poisonous, but may also provide the cure."
+    },
+    {
+        name: "Rimed Crystal Bud",
+        type: "Material",
+        rarity: "Rare",
+        description: "A young plant, frozen into a crystal before it could mature. Material used for crafting items."
     },
     {
         name: "Ritual Pot",
@@ -184,6 +226,18 @@ const materials = [
         type: "Material",
         rarity: "Common",
         description: "Stone fragment found near places where ruins have fallen from the sky. Can be used for crafting, or simply for throwing at enemies. These shards of stone are believed to have once been part of a temple in the sky. They glow with a faint light from within."
+    },
+    {
+        name: "Sacramental Bud",
+        type: "Material",
+        rarity: "Very Rare",
+        description: "An immature bud containing fresh blood. Material used for crafting items. Believed to originate long ago from a strain of buds cultivated with youthful, sacramental blood."
+    },
+    {
+        name: "Sanctuary Stone",
+        type: "Material",
+        rarity: "Uncommon",
+        description: "A rare piece of stone fragment found near places where ruins have fallen from the sky. Material used for crafting items. It feeds and strengthens the light as it shines."
     },
     {
         name: "Shimmering Firefly",
